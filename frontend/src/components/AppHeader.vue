@@ -67,8 +67,7 @@ const handleLogout = async () => {
       <div class="header-content">
         <div class="header-left">
           <button class="brand" type="button" @click="router.push('/dashboard')">
-            <img src="/werk-white.png" alt="Werk logo" class="brand-logo" />
-            <span class="app-title">{{ t('header.appTitle') }}</span>
+            <img src="/logo_white.svg" alt="Werk logo" class="brand-logo" />
           </button>
           <nav class="header-nav">
             <button
@@ -277,6 +276,14 @@ const handleLogout = async () => {
   align-items: center;
 }
 
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 110;
+}
+
 .user-sidebar-toggle {
   border: none;
   background: none;
@@ -477,6 +484,14 @@ const handleLogout = async () => {
 
   .user-toggle-name {
     display: none;
+  }
+
+  .sidebar-overlay {
+    display: block;
+  }
+
+  .user-sidebar-nav {
+    display: flex;
   }
 
   .user-sidebar {

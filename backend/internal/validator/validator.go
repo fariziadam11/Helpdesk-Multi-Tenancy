@@ -20,9 +20,20 @@ func ValidateEmail(email string) bool {
 	return emailRegex.MatchString(email)
 }
 
-// ValidatePassword validates password (minimum 6 characters)
+// ValidatePassword validates password (minimum 6 characters and at least one uppercase letter)
 func ValidatePassword(password string) bool {
-	return len(password) >= 6
+	if len(password) < 6 {
+		return false
+	}
+	// Check for at least one uppercase letter
+	hasUpper := false
+	for _, char := range password {
+		if char >= 'A' && char <= 'Z' {
+			hasUpper = true
+			break
+		}
+	}
+	return hasUpper
 }
 
 // ValidateRequired validates that a string is not empty (after trimming)
@@ -50,4 +61,3 @@ func ValidateStruct(s interface{}) error {
 func GetValidator() *validator.Validate {
 	return validate
 }
-

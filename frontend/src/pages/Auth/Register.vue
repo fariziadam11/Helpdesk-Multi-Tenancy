@@ -22,12 +22,17 @@ const confirmPassword = ref('')
 
 const { mutate: register, isPending } = useRegister()
 
+const hasUpperCase = computed(() => {
+  return /[A-Z]/.test(password.value)
+})
+
 const isFormValid = computed(() => {
   return (
     name.value.trim() !== '' &&
     lastname.value.trim() !== '' &&
     email.value.trim() !== '' &&
     password.value.length >= 6 &&
+    hasUpperCase.value &&
     password.value === confirmPassword.value
   )
 })
@@ -153,6 +158,9 @@ const handleSubmit = (e?: Event) => {
             <div class="input-feedback">
               <small v-if="password.length > 0 && password.length < 6" class="helper-text">
                 <span class="icon"><i class="pi pi-exclamation-triangle"></i></span> {{ t('auth.register.passwordMinLength') }}
+              </small>
+              <small v-if="password.length >= 6 && !hasUpperCase" class="helper-text">
+                <span class="icon"><i class="pi pi-exclamation-triangle"></i></span> {{ t('auth.register.passwordNeedsUppercase') }}
               </small>
             </div>
           </div>

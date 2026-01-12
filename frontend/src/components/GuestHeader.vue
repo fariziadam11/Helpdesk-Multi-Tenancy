@@ -24,8 +24,7 @@ const goToRegister = () => {
     <div class="header-content">
       <div class="header-left">
         <button class="brand" type="button" @click="goToLanding">
-          <img src="/werk-white.png" alt="Werk logo" class="brand-logo" />
-          <span class="app-title">Helpdesk</span>
+          <img src="/logo_white.svg" alt="Werk logo" class="brand-logo" />
         </button>
       </div>
       <div class="header-right">

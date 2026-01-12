@@ -40,7 +40,7 @@ func (s *service) Register(ctx context.Context, req RegisterRequest) (*AuthRespo
 	if !validator.ValidatePassword(req.Password) {
 		return nil, errors.NewAppError(
 			errors.ErrCodeInvalidInput,
-			"password must be at least 6 characters",
+			"password must be at least 6 characters and contain at least one uppercase letter",
 			nil,
 		)
 	}

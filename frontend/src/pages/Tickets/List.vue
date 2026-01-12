@@ -136,4 +136,22 @@ watch(searchQuery, () => {
     font-size: 1.5rem;
   }
 }
+
+@media (max-width: 480px) {
+  .tickets-list-page {
+    padding: 0.75rem;
+  }
+
+  .page-header {
+    gap: 0.75rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .page-header :deep(.p-button) {
+    width: 100%;
+  }
+}
 </style>

@@ -761,6 +761,7 @@ const isCategorySelected = (categoryId: number): boolean => {
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -878,6 +879,133 @@ const isCategorySelected = (categoryId: number): boolean => {
 
   .cta-description {
     font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding: 2rem 1rem;
+    min-height: auto;
+  }
+
+  .hero-title {
+    font-size: 1.75rem;
+  }
+
+  .hero-description {
+    font-size: 0.9375rem;
+    margin-bottom: 2rem;
+  }
+
+  .hero-badge {
+    padding: 0.375rem 1rem;
+    font-size: 0.8125rem;
+  }
+
+  .stats-row {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .stat-item {
+    font-size: 0.875rem;
+  }
+
+  .stat-item i {
+    font-size: 1rem;
+  }
+
+  .categories-section,
+  .articles-section {
+    padding: 2rem 1rem;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .categories-grid {
+    gap: 0.5rem;
+  }
+
+  .category-chip {
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+  }
+
+  .category-chip i {
+    font-size: 0.875rem;
+  }
+
+  .category-count {
+    padding: 0.125rem 0.5rem;
+    font-size: 0.6875rem;
+  }
+
+  .article-card {
+    padding: 1.25rem;
+  }
+
+  .article-title {
+    font-size: 1.125rem;
+  }
+
+  .article-excerpt {
+    font-size: 0.875rem;
+  }
+
+  .article-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .article-stats {
+    align-self: flex-start;
+  }
+
+  .article-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .pagination-btn {
+    min-width: 36px;
+    height: 36px;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .controls-row {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .sort-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .sort-controls label {
+    font-size: 0.875rem;
+  }
+
+  .sort-select {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .search-box-articles {
+    min-width: unset;
+  }
+
+  .articles-header {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 </style>
