@@ -21,8 +21,6 @@ func (s *service) doRequest(ctx context.Context, method, path string, body inter
 		if err != nil {
 			return nil, err
 		}
-		// Debug logging
-		fmt.Printf("[DEBUG] InvGate API Request - Method: %s, Path: %s, Payload: %s\n", method, path, string(payload))
 		buf = bytes.NewBuffer(payload)
 	}
 	return s.doRawRequest(ctx, method, path, params, buf, "application/json")
