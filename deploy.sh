@@ -30,7 +30,7 @@ echo -e "${GREEN}✅ Backend restarted${NC}"
 echo -e "${BLUE}🔨 Building frontend...${NC}"
 cd ../frontend
 cp .env.production .env
-bun install --production
+bun install
 bun run build
 echo -e "${GREEN}✅ Frontend built${NC}"
 
