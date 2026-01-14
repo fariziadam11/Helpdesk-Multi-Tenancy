@@ -381,6 +381,70 @@ sudo certbot --nginx -d your-domain.com
 sudo certbot renew --dry-run
 ```
 
+### ⚠️ Troubleshooting Certbot Issues
+
+#### Error: "Certificate Authority failed to verify"
+
+Jika Anda mendapat error seperti:
+
+```
+Domain: bantuan.werk.co.id
+Type:   unauthorized
+Detail: Invalid response from http://bantuan.werk.co.id/.well-known/acme-challenge/...
+```
+
+**Penyebab**: Nginx tidak dapat diakses dari internet karena listening pada localhost saja.
+
+**Solusi**:
+
+1. **Periksa konfigurasi Nginx** - pastikan listening pada port 80, bukan `127.0.0.1:8000`:
+
+```nginx
+# ❌ SALAH - hanya localhost
+listen 127.0.0.1:8000;
+
+# ✅ BENAR - accessible dari internet
+listen 80;
+server_name bantuan.werk.co.id;
+```
+
+2. **Update konfigurasi**:
+
+```bash
+sudo nano /etc/nginx/sites-available/werk-ticketing
+# Ubah listen 127.0.0.1:8000; menjadi listen 80;
+
+# Test konfigurasi
+sudo nginx -t
+
+# Reload Nginx
+sudo systemctl reload nginx
+```
+
+3. **Verifikasi domain dapat diakses**:
+
+```bash
+# Test dari server
+curl -I http://bantuan.werk.co.id
+
+# Atau dari browser, buka:
+# http://bantuan.werk.co.id
+```
+
+4. **Pastikan firewall membuka port 80 dan 443**:
+
+```bash
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw status
+```
+
+5. **Jalankan Certbot lagi**:
+
+```bash
+sudo certbot --nginx -d bantuan.werk.co.id
+```
+
 ---
 
 ## 📊 Monitoring & Maintenance

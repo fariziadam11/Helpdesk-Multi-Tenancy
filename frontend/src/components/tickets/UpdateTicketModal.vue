@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Ticket, Category } from '@/api/types'
 import Dialog from 'primevue/dialog'
@@ -42,13 +42,67 @@ watch(
     if (isOpen && props.ticket) {
       updateTitle.value = props.ticket.title || ''
       updateDescription.value = props.ticket.description || ''
-      updateCategoryId.value = props.ticket.category_id || null
-      updateTypeId.value = props.ticket.type_id || null
-      updatePriorityId.value = props.ticket.priority_id || null
+      updateCategoryId.value = props.ticket.category_id ? Number(props.ticket.category_id) : null
+      updateTypeId.value = props.ticket.type_id ? Number(props.ticket.type_id) : null
+      updatePriorityId.value = props.ticket.priority_id ? Number(props.ticket.priority_id) : null
     }
   },
   { immediate: true },
 )
+
+// Convert proxy arrays to plain arrays for PrimeVue Select
+// Also add current ticket's values if they're not in the list
+const categoriesArray = computed(() => {
+  if (!props.categories) return []
+  
+  // Convert all category IDs from strings to numbers (backend inconsistency)
+  const arr = props.categories.map((c: any) => ({
+    ...c,
+    id: Number(c.id),
+  }))
+  
+  // If ticket has a category that's not in the list, add it
+  if (props.ticket?.category_id && !arr.some((c: any) => c.id === Number(props.ticket?.category_id))) {
+    arr.unshift({
+      id: Number(props.ticket.category_id),
+      name: props.ticket.category_name || props.ticket.category || `Category ${props.ticket.category_id}`,
+    })
+  }
+  
+  return arr
+})
+
+const typesArray = computed(() => {
+  if (!props.types) return []
+  const arr = [...props.types]
+  
+  // If ticket has a type that's not in the list, add it
+  if (props.ticket?.type_id && !arr.some((t: any) => t.id === props.ticket?.type_id)) {
+    arr.unshift({
+      id: props.ticket.type_id,
+      name: props.ticket.type_name || props.ticket.type || `Type ${props.ticket.type_id}`,
+    })
+  }
+  
+  return arr
+})
+
+const prioritiesArray = computed(() => {
+  if (!props.priorities) return []
+  const arr = [...props.priorities]
+  
+  // If ticket has a priority that's not in the list, add it
+  if (props.ticket?.priority_id && !arr.some((p: any) => p.id === props.ticket?.priority_id)) {
+    arr.unshift({
+      id: props.ticket.priority_id,
+      name: props.ticket.priority_name || props.ticket.priority || `Priority ${props.ticket.priority_id}`,
+    })
+  }
+  
+  return arr
+})
+
+
 
 const handleClose = () => {
   emit('close')
@@ -69,19 +123,19 @@ const handleSubmit = () => {
     updateCategoryId.value &&
     updateCategoryId.value !== props.ticket.category_id
   ) {
-    payload.category_id = updateCategoryId.value
+    payload.category_id = Number(updateCategoryId.value)
   }
   if (
     updateTypeId.value &&
     updateTypeId.value !== props.ticket.type_id
   ) {
-    payload.type_id = updateTypeId.value
+    payload.type_id = Number(updateTypeId.value)
   }
   if (
     updatePriorityId.value &&
     updatePriorityId.value !== props.ticket.priority_id
   ) {
-    payload.priority_id = updatePriorityId.value
+    payload.priority_id = Number(updatePriorityId.value)
   }
 
   if (Object.keys(payload).length === 0) {
@@ -146,7 +200,7 @@ const handleSubmit = () => {
         <Select
           id="updateTicketCategory"
           v-model="updateCategoryId"
-          :options="categories"
+          :options="categoriesArray"
           optionLabel="name"
           optionValue="id"
           :placeholder="t('tickets.form.selectCategory')"
@@ -162,7 +216,7 @@ const handleSubmit = () => {
         <Select
           id="updateTicketType"
           v-model="updateTypeId"
-          :options="types"
+          :options="typesArray"
           optionLabel="name"
           optionValue="id"
           placeholder="Select type"
@@ -178,7 +232,7 @@ const handleSubmit = () => {
         <Select
           id="updateTicketPriority"
           v-model="updatePriorityId"
-          :options="priorities"
+          :options="prioritiesArray"
           optionLabel="name"
           optionValue="id"
           placeholder="Select priority"
