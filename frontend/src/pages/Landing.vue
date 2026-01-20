@@ -32,7 +32,7 @@ const searchQuery = ref('')
 const selectedCategories = ref<number[]>([])
 const sortBy = ref<'newest' | 'popular' | 'alphabetical'>('newest')
 const currentPage = ref(1)
-const itemsPerPage = 9
+const itemsPerPage = 12
 
 // Count articles per category
 const categoryArticleCounts = computed(() => {
@@ -118,13 +118,6 @@ const formatDate = (timestamp: number): string => {
     month: 'short',
     day: 'numeric',
   })
-}
-
-const truncateContent = (content: string, maxLength: number = 120): string => {
-  if (!content) return ''
-  const text = content.replace(/<[^>]*>/g, '')
-  if (text.length <= maxLength) return text
-  return text.substring(0, maxLength) + '...'
 }
 
 const goToArticle = (articleId: number, categoryId: number) => {
@@ -275,27 +268,16 @@ const isCategorySelected = (categoryId: number): boolean => {
               <div class="article-header">
                 <span class="article-category">{{ getCategoryName(article.category_id) }}</span>
                 <div class="article-stats">
-                  <span v-if="article.rating > 0" class="stat">
-                    <i class="pi pi-star-fill"></i>
-                    {{ article.rating.toFixed(1) }}
-                  </span>
                   <span class="stat">
-                    <i class="pi pi-eye"></i>
-                    {{ article.views }}
+                    <i class="pi pi-calendar"></i>
+                    {{ formatDate(article.creation_date) }}
                   </span>
                 </div>
               </div>
 
               <h3 class="article-title">{{ article.title }}</h3>
-              <p v-if="article.content" class="article-excerpt">
-                {{ truncateContent(article.content) }}
-              </p>
 
               <div class="article-footer">
-                <span class="article-date">
-                  <i class="pi pi-calendar"></i>
-                  {{ formatDate(article.creation_date) }}
-                </span>
                 <span class="read-more">
                   {{ t('landing.articles.readMore') }} <i class="pi pi-arrow-right"></i>
                 </span>
@@ -776,19 +758,14 @@ const isCategorySelected = (categoryId: number): boolean => {
 
 .article-footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   padding-top: 1rem;
   border-top: 1px solid #e0e0e0;
   font-size: 0.875rem;
 }
 
-.article-date {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--text-secondary);
-}
+
 
 .read-more {
   display: flex;

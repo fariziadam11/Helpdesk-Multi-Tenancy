@@ -41,12 +41,32 @@ const files = ref<File[]>([])
 
 const { mutate: createComment, isPending } = useCreateComment(props.ticketId)
 
+const convertToHTML = (text: string): string => {
+  if (!text.trim()) return ''
+  
+  // Split by double newlines for paragraphs
+  const paragraphs = text.split(/\n\n+/)
+  
+  // Convert each paragraph, replacing single newlines with <br>
+  const htmlParagraphs = paragraphs.map(p => {
+    const trimmed = p.trim()
+    if (!trimmed) return ''
+    const withBreaks = trimmed.replace(/\n/g, '<br>')
+    return `<p>${withBreaks}</p>`
+  }).filter(p => p !== '')
+  
+  return htmlParagraphs.join('')
+}
+
 const handleSubmit = () => {
   if (!message.value.trim()) return
 
+  // Convert plain text to HTML
+  const htmlMessage = convertToHTML(message.value)
+
   createComment(
     {
-      message: message.value,
+      message: htmlMessage,
       attachments: files.value.length > 0 ? files.value : undefined,
     },
     {
@@ -126,7 +146,7 @@ const handleModalClose = () => {
             id="commentListModalTextarea"
             v-model="message"
             :placeholder="t('tickets.detailPage.writeComment')"
-            :rows="5"
+            :rows="4"
             class="form-input"
           />
         </div>

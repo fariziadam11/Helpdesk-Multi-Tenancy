@@ -6,8 +6,8 @@ import ArticlesIndex from '@/pages/Articles/Index.vue'
 import ArticleDetail from '@/pages/Articles/Detail.vue'
 import Dashboard from '@/pages/Dashboard/Index.vue'
 import Login from '@/pages/Auth/Login.vue'
-import Register from '@/pages/Auth/Register.vue'
 import Landing from '@/pages/Landing.vue'
+import Profile from '@/pages/Profile/Index.vue'
 import { getCookie } from '@/utils/cookies'
 import { COOKIE_NAMES } from '@/utils/constants'
 
@@ -38,9 +38,27 @@ const router = createRouter({
     },
     {
       path: '/register',
-      name: 'register',
-      component: Register,
+      name: 'Register',
+      component: () => import('@/pages/Auth/Register.vue'),
       meta: { requiresGuest: true },
+    },
+    {
+      path: '/forgot-password',
+      name: 'ForgotPassword',
+      component: () => import('@/pages/Auth/ForgotPassword.vue'),
+      meta: { requiresGuest: true },
+    },
+    {
+      path: '/reset-password',
+      name: 'ResetPassword',
+      component: () => import('@/pages/Auth/ResetPassword.vue'),
+      meta: { requiresGuest: true },
+    },
+    {
+      path: '/profile',
+      name: 'profile',
+      component: Profile,
+      meta: { requiresAuth: true },
     },
     {
       path: '/tickets',

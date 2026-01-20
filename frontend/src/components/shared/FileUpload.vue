@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { formatFileSize, handleFileInputChange, removeFileFromArray } from '@/utils/file'
+import { formatFileSize, removeFileFromArray } from '@/utils/file'
 
 interface Props {
   files: File[]
@@ -8,6 +8,9 @@ interface Props {
   multiple?: boolean
   accept?: string
   id?: string
+  maxFiles?: number
+  maxFileSize?: number // in bytes
+  allowedFormats?: string[] // file extensions without dot
 }
 
 interface Emits {
@@ -19,6 +22,9 @@ const props = withDefaults(defineProps<Props>(), {
   multiple: true,
   accept: undefined,
   id: undefined,
+  maxFiles: undefined,
+  maxFileSize: undefined,
+  allowedFormats: undefined,
 })
 
 const emit = defineEmits<Emits>()
@@ -26,6 +32,7 @@ const emit = defineEmits<Emits>()
 const inputId = computed(() => props.id || `fileInput-${Math.random().toString(36).substr(2, 9)}`)
 
 const localFiles = ref<File[]>([...props.files])
+const errorMessage = ref<string>('')
 
 watch(
   () => props.files,
@@ -35,10 +42,50 @@ watch(
   { deep: true },
 )
 
+const validateFile = (file: File): string | null => {
+  // Check file size
+  if (props.maxFileSize && file.size > props.maxFileSize) {
+    const maxSizeMB = (props.maxFileSize / (1024 * 1024)).toFixed(0)
+    return `File "${file.name}" melebihi ukuran maksimum ${maxSizeMB}MB`
+  }
+
+  // Check file format
+  if (props.allowedFormats && props.allowedFormats.length > 0) {
+    const fileExt = file.name.split('.').pop()?.toLowerCase()
+    if (!fileExt || !props.allowedFormats.includes(fileExt)) {
+      return `File "${file.name}" harus berformat ${props.allowedFormats.join(', ')}`
+    }
+  }
+
+  return null
+}
+
 const handleFileChange = (event: Event) => {
-  const newFiles = handleFileInputChange(event, localFiles.value)
+  errorMessage.value = ''
+  const input = event.target as HTMLInputElement
+  const selectedFiles = Array.from(input.files || [])
+
+  // Check max files limit
+  if (props.maxFiles && localFiles.value.length + selectedFiles.length > props.maxFiles) {
+    errorMessage.value = `Maksimum ${props.maxFiles} file dapat diupload`
+    input.value = ''
+    return
+  }
+
+  // Validate each file
+  for (const file of selectedFiles) {
+    const error = validateFile(file)
+    if (error) {
+      errorMessage.value = error
+      input.value = ''
+      return
+    }
+  }
+
+  const newFiles = [...localFiles.value, ...selectedFiles]
   localFiles.value = newFiles
   emit('update:files', newFiles)
+  input.value = ''
 }
 
 const removeFile = (index: number) => {
@@ -79,7 +126,8 @@ const removeFile = (index: number) => {
         </button>
       </div>
     </div>
-    <small v-if="localFiles.length > 0" class="helper-text">
+    <small v-if="errorMessage" class="error-text">{{ errorMessage }}</small>
+    <small v-else-if="localFiles.length > 0" class="helper-text">
       {{ localFiles.length }} file(s) selected
     </small>
   </div>
@@ -218,6 +266,12 @@ const removeFile = (index: number) => {
 .helper-text {
   font-size: 0.8125rem;
   color: var(--text-secondary);
+  margin-top: 0.25rem;
+}
+
+.error-text {
+  font-size: 0.8125rem;
+  color: #da1e28;
   margin-top: 0.25rem;
 }
 </style>

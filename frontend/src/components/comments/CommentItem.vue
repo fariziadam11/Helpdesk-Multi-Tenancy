@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import type { Comment, Attachment } from "@/api/types";
 import { formatUnixTimestamp } from "@/utils/date";
@@ -16,15 +15,7 @@ const props = defineProps<Props>();
 
 const { displayName, isAgent } = useUserName(props.comment.author_id);
 
-const stripHtml = (value?: string) => {
-  if (!value) return "";
-  return value.replace(/<[^>]*>/g, "").trim();
-};
 
-const displayMessage = computed(() => {
-  const raw = props.comment.message || props.comment.comment || "";
-  return stripHtml(raw);
-});
 
 const getAttachments = (comment: Comment): Array<number | Attachment> => {
   const attachments = comment.attached_files || comment.attachments;
@@ -60,9 +51,7 @@ const getAttachments = (comment: Comment): Array<number | Attachment> => {
           {{ formatUnixTimestamp(comment.created_at) }}
         </span>
       </div>
-      <div class="comment-body">
-        {{ displayMessage || t('tickets.detailPage.noComments') }}
-      </div>
+      <div class="comment-body" v-html="comment.message || comment.comment || t('tickets.detailPage.noComments')"></div>
       <div
         v-if="getAttachments(comment).length > 0"
         class="comment-attachments"
@@ -124,7 +113,52 @@ const getAttachments = (comment: Comment): Array<number | Attachment> => {
 
 .comment-body {
   margin-bottom: 0.5rem;
-  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+.comment-body :deep(p) {
+  margin: 0 0 0.75rem 0;
+}
+
+.comment-body :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.comment-body :deep(br) {
+  display: block;
+  content: "";
+  margin-top: 0.5rem;
+}
+
+.comment-body :deep(a) {
+  color: #6929C4;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.comment-body :deep(a:hover) {
+  color: #4F2196;
+  text-decoration: none;
+}
+
+.comment-body :deep(strong),
+.comment-body :deep(b) {
+  font-weight: 600;
+}
+
+.comment-body :deep(em),
+.comment-body :deep(i) {
+  font-style: italic;
+}
+
+.comment-body :deep(ul),
+.comment-body :deep(ol) {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.comment-body :deep(li) {
+  margin: 0.25rem 0;
 }
 
 .comment-attachments {

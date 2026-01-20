@@ -42,9 +42,7 @@ const formatDate = (timestamp: number): string => {
   })
 }
 
-const formatRating = (rating: number): string => {
-  return rating > 0 ? `${rating.toFixed(1)} ⭐` : 'No rating'
-}
+
 
 const goBack = () => {
   // Check if user is authenticated, if not go to landing page
@@ -172,28 +170,13 @@ watch(foundArticle, () => {
         <h1 class="article-title">{{ foundArticle.title }}</h1>
         <div class="article-meta">
           <span class="meta-item">
-            <i class="pi pi-star"></i>
-            {{ formatRating(foundArticle.rating) }}
+            <i class="pi pi-calendar"></i>
+            {{ formatDate(foundArticle.creation_date) }}
           </span>
-          <span class="meta-item">
-            <i class="pi pi-eye"></i>
-            {{ foundArticle.views }} views
+          <span v-if="foundArticle.last_update_date !== foundArticle.creation_date" class="meta-item">
+            <i class="pi pi-clock"></i>
+            Last Updated: {{ formatDate(foundArticle.last_update_date) }}
           </span>
-          <span v-if="foundArticle.solved_requests" class="meta-item">
-            <i class="pi pi-check-circle"></i>
-            Solved {{ foundArticle.solved_requests }} requests
-          </span>
-        </div>
-      </div>
-
-      <div class="article-info">
-        <div class="info-item">
-          <span class="info-label">Created:</span>
-          <span class="info-value">{{ formatDate(foundArticle.creation_date) }}</span>
-        </div>
-        <div v-if="foundArticle.last_update_date !== foundArticle.creation_date" class="info-item">
-          <span class="info-label">Last Updated:</span>
-          <span class="info-value">{{ formatDate(foundArticle.last_update_date) }}</span>
         </div>
       </div>
 
@@ -319,35 +302,11 @@ watch(foundArticle, () => {
   font-size: 1rem;
 }
 
-.meta-item:first-child {
-  color: #f1c21b;
-  font-weight: 500;
+.meta-item:first-child i {
+  color: #6929C4;
 }
 
-.article-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 1rem;
-  background-color: #ffffff;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-}
 
-.info-item {
-  display: flex;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-}
-
-.info-label {
-  color: var(--text-secondary);
-  font-weight: 500;
-}
-
-.info-value {
-  color: var(--text-primary);
-}
 
 .article-content-wrapper {
   background-color: #ffffff;

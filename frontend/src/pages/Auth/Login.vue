@@ -78,10 +78,10 @@ const handleSubmit = (e?: Event) => {
               inputClass="form-input"
               class="password-input"
             />
-            <div class="input-feedback">
-              <small v-if="password.length > 0 && password.length < 6" class="helper-text">
-                <span class="icon"><i class="pi pi-exclamation-triangle"></i></span> {{ t('auth.login.passwordMinLength') }}
-              </small>
+            <div class="forgot-password-link">
+              <a href="#" @click.prevent="router.push('/forgot-password')" class="auth-link">
+                {{ t('auth.login.forgotPassword') }}
+              </a>
             </div>
           </div>
 
@@ -187,6 +187,15 @@ const handleSubmit = (e?: Event) => {
 
 .password-input :deep(.p-password-input) {
   width: 100%;
+}
+
+.forgot-password-link {
+  text-align: right;
+  margin-top: 0.5rem;
+}
+
+.forgot-password-link .auth-link {
+  font-size: 0.875rem;
 }
 
 .input-feedback {

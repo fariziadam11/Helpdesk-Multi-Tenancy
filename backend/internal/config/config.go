@@ -40,6 +40,14 @@ type Config struct {
 	LogLevel  string
 	GinMode   string
 	LogFormat string
+
+	// Mailgun Email
+	MailgunDomain string
+	MailgunAPIKey string
+	MailgunSender string
+
+	// Frontend
+	FrontendURL string
 }
 
 // Load loads configuration from environment variables (optionally via .env files).
@@ -66,6 +74,10 @@ func Load() (*Config, error) {
 		LogLevel:          getEnv("LOG_LEVEL", "info"),
 		GinMode:           getEnv("GIN_MODE", "debug"),
 		LogFormat:         getEnv("LOG_FORMAT", "text"),
+		MailgunDomain:     getEnv("MAILGUN_DOMAIN", "mg.werk.co.id"),
+		MailgunAPIKey:     getEnv("MAILGUN_API_KEY", ""),
+		MailgunSender:     getEnv("MAILGUN_SENDER", "Werk <no-reply@mg.werk.co.id>"),
+		FrontendURL:       getEnv("FRONTEND_URL", "http://localhost:5173"),
 	}
 
 	if cfg.JWTSecret == "" {

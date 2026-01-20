@@ -14,6 +14,7 @@ import Textarea from "primevue/textarea";
 import Select from "primevue/select";
 import Button from "primevue/button";
 import ProgressSpinner from "primevue/progressspinner";
+import { onMounted } from "vue";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -44,12 +45,21 @@ const categoryOptions = computed(() => categories.value || []);
 const typeOptions = computed(() => ticketMeta.value?.types || []);
 const priorityOptions = computed(() => ticketMeta.value?.priorities || []);
 
+// Auto-select "Problem" type on mount
+onMounted(() => {
+  if (ticketMeta.value?.types) {
+    const problemType = ticketMeta.value.types.find(t => t.name.toLowerCase() === 'problem')
+    if (problemType) {
+      typeId.value = String(problemType.id)
+    }
+  }
+})
+
 const validation = useFormValidation({
   fields: {
     title: { value: title, required: true },
     description: { value: description, required: true },
     categoryId: { value: categoryId, required: true },
-    typeId: { value: typeId, required: true },
     priorityId: { value: priorityId, required: true },
     dateOccurred: { value: dateOccurred, required: true },
   },
@@ -167,32 +177,6 @@ const handleSubmit = () => {
       </div>
 
       <div class="form-item">
-        <label for="createTicketTypeSelect" class="form-label">
-          {{ t('tickets.form.type') }} <span class="required">*</span>
-        </label>
-        <Select
-          id="createTicketTypeSelect"
-          v-model="typeId"
-          :options="typeOptions"
-          optionLabel="name"
-          optionValue="id"
-          :placeholder="t('tickets.form.selectType')"
-          :disabled="metaLoading || isPending"
-          :invalid="validation.isFieldInvalid('typeId')"
-          @blur="validation.markFieldTouched('typeId')"
-          class="form-input"
-        />
-        <ProgressSpinner
-          v-if="metaLoading"
-          style="width: 20px; height: 20px; margin-top: 0.5rem"
-          strokeWidth="4"
-        />
-        <small v-if="validation.isFieldInvalid('typeId')" class="error-text">
-          {{ validation.getFieldError("typeId") }}
-        </small>
-      </div>
-
-      <div class="form-item">
         <label for="createTicketPrioritySelect" class="form-label">
           {{ t('tickets.form.priority') }} <span class="required">*</span>
         </label>
@@ -253,9 +237,17 @@ const handleSubmit = () => {
 
       <div class="form-item">
         <label for="createTicketFileInput" class="form-label">
-          {{ t('tickets.form.attachments') }} <span class="optional-text">({{ t('tickets.form.optional') }})</span>
+          {{ t('tickets.form.screenshot') }} <span class="optional-text">({{ t('tickets.form.optional') }})</span>
         </label>
-        <FileUpload v-model:files="files" :disabled="isPending" />
+        <FileUpload 
+          v-model:files="files" 
+          :disabled="isPending"
+          accept="image/jpeg,image/jpg,image/png"
+          :allowed-formats="['jpg', 'jpeg', 'png']"
+          :max-file-size="2 * 1024 * 1024"
+          :max-files="4"
+        />
+        <small class="helper-text">Format: JPG, JPEG, PNG • Maksimum 2MB per file • Maksimum 4 file</small>
       </div>
 
       <div v-if="error" class="error-message">{{ t('tickets.form.error') }}: {{ error.message }}</div>

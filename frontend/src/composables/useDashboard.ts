@@ -23,6 +23,7 @@ export const useDashboard = () => {
     ).length
     const resolvedTickets = allTickets.filter((t) => t.status === 'Resolved' || t.status === 'Closed').length
     const pendingTickets = allTickets.filter((t) => t.status === 'Pending' || t.status === 'Waiting').length
+    const rejectedTickets = allTickets.filter((t) => t.status === 'Rejected').length
 
     // Group by status
     const statusCounts: Record<string, number> = {}
@@ -48,6 +49,7 @@ export const useDashboard = () => {
       openTickets,
       resolvedTickets,
       pendingTickets,
+      rejectedTickets,
       statusCounts,
       priorityCounts,
       recentTickets,

@@ -18,6 +18,9 @@ type Service interface {
 	RevokeToken(ctx context.Context, token string) error
 	ParseToken(token string) (*jwt.RegisteredClaims, error)
 	IsTokenBlacklisted(token string) bool
+	// Password reset methods
+	RequestPasswordReset(ctx context.Context, email string) error
+	ResetPassword(ctx context.Context, token, newPassword string) error
 }
 
 type service struct {
@@ -29,10 +32,12 @@ type service struct {
 	companyID     int
 	groupID       int
 	locationID    int
+	emailClient   EmailClient
+	frontendURL   string
 }
 
 // NewService instantiates auth service.
-func NewService(repo user.Repository, invgateClient invgate.Service, jwtSecret string, logger *logrus.Logger, companyID, groupID, locationID int) Service {
+func NewService(repo user.Repository, invgateClient invgate.Service, jwtSecret string, logger *logrus.Logger, companyID, groupID, locationID int, emailClient EmailClient, frontendURL string) Service {
 	return &service{
 		userRepo:      repo,
 		invgateClient: invgateClient,
@@ -42,5 +47,12 @@ func NewService(repo user.Repository, invgateClient invgate.Service, jwtSecret s
 		companyID:     companyID,
 		groupID:       groupID,
 		locationID:    locationID,
+		emailClient:   emailClient,
+		frontendURL:   frontendURL,
 	}
+}
+
+// EmailClient interface for sending emails
+type EmailClient interface {
+	SendPasswordResetEmail(to, resetLink string) error
 }

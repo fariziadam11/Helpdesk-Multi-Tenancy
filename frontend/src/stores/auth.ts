@@ -97,6 +97,16 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  function updateUser(userData: { name: string; lastname: string; email: string }) {
+    user.value = userData
+    setCookie(COOKIE_NAMES.USER, JSON.stringify(user.value), {
+      expires: COOKIE_OPTIONS.EXPIRES_DAYS,
+      path: COOKIE_OPTIONS.PATH,
+      secure: import.meta.env.PROD,
+      sameSite: COOKIE_OPTIONS.SAME_SITE,
+    })
+  }
+
   return {
     token,
     refreshToken,
@@ -106,6 +116,7 @@ export const useAuthStore = defineStore('auth', () => {
     setAuth,
     clearAuth,
     initializeAuth,
+    updateUser,
   }
 })
 

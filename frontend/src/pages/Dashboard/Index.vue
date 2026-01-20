@@ -1,18 +1,15 @@
 <script setup lang="ts">
-import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useDashboard } from "@/composables/useDashboard";
 import { useAuthStore } from "@/stores/auth";
-import VueApexCharts from "vue3-apexcharts";
-import type { ApexOptions } from "apexcharts";
 import ProgressSpinner from "primevue/progressspinner";
 import Button from "primevue/button";
 
 const { t } = useI18n();
 const router = useRouter();
 const authStore = useAuthStore();
-const { stats, statusChartData, timeSeriesData, isLoading } = useDashboard();
+const { stats, isLoading } = useDashboard();
 
 const formatDate = (timestamp: number): string => {
   const date = new Date(timestamp * 1000);
@@ -38,71 +35,6 @@ const getStatusColor = (status: string): string => {
   };
   return statusColors[status] || "#6f6f6f";
 };
-
-const statusChartSeries = computed(() => statusChartData.value.series);
-const timeSeriesChartSeries = computed(() => [
-  {
-    name: t('dashboard.charts.ticketsCreated'),
-    data: timeSeriesData.value.series,
-  },
-]);
-
-// Chart options for status distribution (Donut chart) - reactive
-const statusChartOptionsComputed = computed<ApexOptions>(() => ({
-  chart: {
-    type: "donut",
-    toolbar: {
-      show: false,
-    },
-    width: "100%",
-  },
-  labels: statusChartData.value.labels,
-  colors: statusChartData.value.labels.map((label) => getStatusColor(label)),
-  legend: {
-    position: "bottom",
-  },
-  dataLabels: {
-    enabled: true,
-    formatter: (val: number) => `${val.toFixed(1)}%`,
-  },
-  plotOptions: {
-    pie: {
-      donut: {
-        size: "70%",
-      },
-    },
-  },
-}));
-
-// Chart options for time series (Line chart) - reactive
-const timeSeriesChartOptionsComputed = computed<ApexOptions>(() => ({
-  chart: {
-    type: "line",
-    toolbar: {
-      show: false,
-    },
-    zoom: {
-      enabled: false,
-    },
-    width: "100%",
-  },
-  stroke: {
-    curve: "smooth",
-    width: 3,
-  },
-  colors: ["#6929C4"],
-  xaxis: {
-    categories: timeSeriesData.value.labels,
-  },
-  yaxis: {
-    title: {
-      text: t('dashboard.charts.numberOfTickets'),
-    },
-  },
-  grid: {
-    borderColor: "#e0e0e0",
-  },
-}));
 </script>
 
 <template>
@@ -160,31 +92,14 @@ const timeSeriesChartOptionsComputed = computed<ApexOptions>(() => ({
             <p class="stat-label">{{ t('dashboard.stats.pendingTickets') }}</p>
           </div>
         </div>
-      </div>
 
-      <!-- Charts Section -->
-      <div class="charts-grid">
-        <div class="chart-card">
-          <h2 class="chart-title">{{ t('dashboard.charts.ticketsByStatus') }}</h2>
-          <div class="chart-container">
-            <VueApexCharts
-              type="donut"
-              height="350"
-              :options="statusChartOptionsComputed"
-              :series="statusChartSeries"
-            />
+        <div class="stat-card">
+          <div class="stat-icon rejected">
+            <i class="pi pi-times-circle"></i>
           </div>
-        </div>
-
-        <div class="chart-card">
-          <h2 class="chart-title">{{ t('dashboard.charts.ticketsCreated') }}</h2>
-          <div class="chart-container">
-            <VueApexCharts
-              type="line"
-              height="350"
-              :options="timeSeriesChartOptionsComputed"
-              :series="timeSeriesChartSeries"
-            />
+          <div class="stat-content">
+            <h3 class="stat-value">{{ stats.rejectedTickets }}</h3>
+            <p class="stat-label">{{ t('dashboard.stats.rejectedTickets') }}</p>
           </div>
         </div>
       </div>
@@ -352,6 +267,11 @@ const timeSeriesChartOptionsComputed = computed<ApexOptions>(() => ({
   color: #8a3ffc;
 }
 
+.stat-icon.rejected {
+  background-color: #da1e2820;
+  color: #da1e28;
+}
+
 .stat-content {
   flex: 1;
 }
@@ -367,48 +287,6 @@ const timeSeriesChartOptionsComputed = computed<ApexOptions>(() => ({
   font-size: 0.875rem;
   color: var(--text-secondary);
   margin: 0;
-}
-
-/* Charts Section */
-.charts-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 1.5rem;
-}
-
-.chart-card {
-  background-color: #ffffff;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 1.5rem;
-  overflow: visible;
-  min-height: 450px;
-  display: flex;
-  flex-direction: column;
-}
-
-.chart-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0 0 1.5rem 0;
-  flex-shrink: 0;
-}
-
-.chart-container {
-  flex: 1;
-  min-height: 0;
-  overflow: visible;
-  position: relative;
-  width: 100%;
-}
-
-.chart-container :deep(.apexcharts-canvas) {
-  overflow: visible !important;
-}
-
-.chart-container :deep(.apexcharts-svg) {
-  overflow: visible !important;
 }
 
 /* Bottom Grid */

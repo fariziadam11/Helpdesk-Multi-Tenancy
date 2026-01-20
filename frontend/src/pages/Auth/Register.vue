@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useRegister } from '@/composables/useAuth'
 import { useToast } from '@/composables/useToast'
 import GuestHeader from '@/components/GuestHeader.vue'
+import PasswordStrength from '@/components/shared/PasswordStrength.vue'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
 import Button from 'primevue/button'
@@ -22,17 +23,18 @@ const confirmPassword = ref('')
 
 const { mutate: register, isPending } = useRegister()
 
-const hasUpperCase = computed(() => {
-  return /[A-Z]/.test(password.value)
-})
-
 const isFormValid = computed(() => {
+  const hasMinLength = password.value.length >= 6
+  const hasUpperCase = /[A-Z]/.test(password.value)
+  const hasSpecialChars = (password.value.match(/[^a-zA-Z0-9]/g) || []).length >= 2
+  
   return (
     name.value.trim() !== '' &&
     lastname.value.trim() !== '' &&
     email.value.trim() !== '' &&
-    password.value.length >= 6 &&
-    hasUpperCase.value &&
+    hasMinLength &&
+    hasUpperCase &&
+    hasSpecialChars &&
     password.value === confirmPassword.value
   )
 })
@@ -155,14 +157,7 @@ const handleSubmit = (e?: Event) => {
               inputClass="form-input"
               class="password-input"
             />
-            <div class="input-feedback">
-              <small v-if="password.length > 0 && password.length < 6" class="helper-text">
-                <span class="icon"><i class="pi pi-exclamation-triangle"></i></span> {{ t('auth.register.passwordMinLength') }}
-              </small>
-              <small v-if="password.length >= 6 && !hasUpperCase" class="helper-text">
-                <span class="icon"><i class="pi pi-exclamation-triangle"></i></span> {{ t('auth.register.passwordNeedsUppercase') }}
-              </small>
-            </div>
+            <PasswordStrength :password="password" />
           </div>
 
           <div class="form-item">

@@ -27,3 +27,14 @@ type AuthResponse struct {
 type RefreshTokenRequest struct {
 	RefreshToken string `json:"refresh_token" binding:"required" validate:"required"`
 }
+
+// ForgotPasswordRequest request for password reset
+type ForgotPasswordRequest struct {
+	Email string `json:"email" binding:"required,email" validate:"required,email"`
+}
+
+// ResetPasswordRequest request for resetting password with token
+type ResetPasswordRequest struct {
+	Token    string `json:"token" binding:"required" validate:"required"`
+	Password string `json:"password" binding:"required,min=6" validate:"required,min=6"`
+}

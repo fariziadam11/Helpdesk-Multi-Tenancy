@@ -168,6 +168,17 @@ const handleLogout = async () => {
           <span class="user-sidebar-name">{{ authStore.fullName }}</span>
         </div>
 
+        <!-- Profile Button -->
+        <Button
+          id="headerProfileBtn"
+          severity="secondary"
+          size="small"
+          icon="pi pi-user-edit"
+          :label="t('nav.profile')"
+          class="user-sidebar-profile-btn"
+          @click="navigateTo('/profile')"
+        />
+
         <!-- Logout Button -->
         <Button
           id="headerLogoutBtn"
@@ -454,6 +465,11 @@ const handleLogout = async () => {
   font-size: 0.875rem;
   font-weight: 500;
   color: #ffffff;
+}
+
+.user-sidebar-profile-btn {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
 }
 
 .user-sidebar-logout-btn {

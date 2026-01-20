@@ -16,6 +16,7 @@ import (
 	"werk-ticketing/internal/config"
 	"werk-ticketing/internal/constants"
 	"werk-ticketing/internal/database"
+	"werk-ticketing/internal/email"
 	"werk-ticketing/internal/invgate"
 	"werk-ticketing/internal/router"
 	"werk-ticketing/internal/ticket"
@@ -48,7 +49,8 @@ func main() {
 	// Auto migrate all models
 	// This ensures all tables are created/updated when the application starts
 	if err := db.AutoMigrate(
-		&user.User{}, // Users table
+		&user.User{},       // Users table
+		&user.ResetToken{}, // Password reset tokens table
 	); err != nil {
 		log.Fatalf("auto migrate error: %v", err)
 	}
@@ -62,6 +64,9 @@ func main() {
 	ticketService := ticket.NewService(invgateClient, userRepo, logger)
 	ticketHandler := ticket.NewHandler(ticketService)
 
+	// Initialize email client
+	emailClient := email.NewMailgunClient(cfg.MailgunDomain, cfg.MailgunAPIKey, cfg.MailgunSender)
+
 	authService := auth.NewService(
 		userRepo,
 		invgateClient,
@@ -70,11 +75,14 @@ func main() {
 		cfg.ArmMadaCompanyID,
 		cfg.ArmMadaGroupID,
 		cfg.ArmMadaLocationID,
+		emailClient,
+		cfg.FrontendURL,
 	)
 	authHandler := auth.NewHandler(authService)
+	userHandler := user.NewHandler(userRepo)
 
 	// Setup router
-	appRouter := router.NewRouter(authHandler, ticketHandler, authService, logger)
+	appRouter := router.NewRouter(authHandler, ticketHandler, userHandler, authService, logger)
 	ginRouter := appRouter.SetupRoutes()
 
 	// Create HTTP server with timeouts

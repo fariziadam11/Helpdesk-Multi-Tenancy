@@ -8,12 +8,14 @@ import (
 	"werk-ticketing/internal/constants"
 	"werk-ticketing/internal/middleware"
 	"werk-ticketing/internal/ticket"
+	"werk-ticketing/internal/user"
 )
 
 // Router holds all route dependencies
 type Router struct {
 	authHandler   *auth.Handler
 	ticketHandler *ticket.Handler
+	userHandler   *user.Handler
 	authService   auth.Service
 	logger        *logrus.Logger
 }
@@ -22,12 +24,14 @@ type Router struct {
 func NewRouter(
 	authHandler *auth.Handler,
 	ticketHandler *ticket.Handler,
+	userHandler *user.Handler,
 	authService auth.Service,
 	logger *logrus.Logger,
 ) *Router {
 	return &Router{
 		authHandler:   authHandler,
 		ticketHandler: ticketHandler,
+		userHandler:   userHandler,
 		authService:   authService,
 		logger:        logger,
 	}
@@ -62,6 +66,8 @@ func (r *Router) SetupRoutes() *gin.Engine {
 	{
 		// GET /api/users/:id - Get InvGate user detail by ID
 		userRoutes.GET("/:id", r.ticketHandler.GetInvGateUser)
+		// PUT /api/users/profile - Update current user's profile
+		userRoutes.PUT("/profile", r.userHandler.UpdateProfile)
 	}
 
 	// Categories endpoint (public, no auth required for reference data)

@@ -110,3 +110,50 @@ func (h *Handler) RevokeToken(c *gin.Context) {
 
 	response.Write(c, http.StatusOK, gin.H{"message": "token revoked successfully"})
 }
+
+// ForgotPassword handles POST /auth/forgot-password
+func (h *Handler) ForgotPassword(c *gin.Context) {
+	var req ForgotPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.ErrorWithCode(c, http.StatusBadRequest, errors.ErrCodeInvalidInput, "invalid JSON body")
+		return
+	}
+
+	err := h.service.RequestPasswordReset(c.Request.Context(), req.Email)
+	if err != nil {
+		if appErr, ok := err.(*errors.AppError); ok {
+			response.AppError(c, appErr)
+		} else {
+			response.ErrorWithCode(c, http.StatusInternalServerError, errors.ErrCodeInternal, err.Error())
+		}
+		return
+	}
+
+	// Always return success to prevent email enumeration
+	response.Write(c, http.StatusOK, gin.H{
+		"message": "If the email exists, a password reset link has been sent",
+	})
+}
+
+// ResetPassword handles POST /auth/reset-password
+func (h *Handler) ResetPassword(c *gin.Context) {
+	var req ResetPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.ErrorWithCode(c, http.StatusBadRequest, errors.ErrCodeInvalidInput, "invalid JSON body")
+		return
+	}
+
+	err := h.service.ResetPassword(c.Request.Context(), req.Token, req.Password)
+	if err != nil {
+		if appErr, ok := err.(*errors.AppError); ok {
+			response.AppError(c, appErr)
+		} else {
+			response.ErrorWithCode(c, http.StatusBadRequest, errors.ErrCodeInvalidInput, err.Error())
+		}
+		return
+	}
+
+	response.Write(c, http.StatusOK, gin.H{
+		"message": "Password has been reset successfully",
+	})
+}
