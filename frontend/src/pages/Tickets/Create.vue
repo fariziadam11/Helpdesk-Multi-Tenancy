@@ -14,7 +14,7 @@ import Textarea from "primevue/textarea";
 import Select from "primevue/select";
 import Button from "primevue/button";
 import ProgressSpinner from "primevue/progressspinner";
-import { onMounted } from "vue";
+import { watch } from "vue";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -42,18 +42,17 @@ const { data: ticketMeta, isLoading: metaLoading } = useTicketMeta();
 const { mutate: createTicket, isPending, error } = useCreateTicket();
 
 const categoryOptions = computed(() => categories.value || []);
-const typeOptions = computed(() => ticketMeta.value?.types || []);
 const priorityOptions = computed(() => ticketMeta.value?.priorities || []);
 
-// Auto-select "Problem" type on mount
-onMounted(() => {
-  if (ticketMeta.value?.types) {
-    const problemType = ticketMeta.value.types.find(t => t.name.toLowerCase() === 'problem')
+// Auto-select "Problem" type when ticketMeta is loaded
+watch(ticketMeta, (meta) => {
+  if (meta?.types && !typeId.value) {
+    const problemType = meta.types.find(t => t.name.toLowerCase() === 'problem')
     if (problemType) {
       typeId.value = String(problemType.id)
     }
   }
-})
+}, { immediate: true })
 
 const validation = useFormValidation({
   fields: {
