@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useRegister } from '@/composables/useAuth'
 import { useToast } from '@/composables/useToast'
-import GuestHeader from '@/components/GuestHeader.vue'
 import PasswordStrength from '@/components/shared/PasswordStrength.vue'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
@@ -87,7 +86,6 @@ const handleSubmit = (e?: Event) => {
 </script>
 
 <template>
-  <GuestHeader />
   <div class="auth-page">
     <div class="auth-container">
       <div id="registerTile" class="auth-card">
