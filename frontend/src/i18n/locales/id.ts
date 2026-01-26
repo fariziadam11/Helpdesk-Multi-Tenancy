@@ -111,7 +111,7 @@ export default {
     },
     articles: {
       all: 'Semua Panduan',
-      selected: 'Artikel yang Dipilih',
+      selected: 'Panduan yang Dipilih',
       count: '{count} artikel',
       searchPlaceholder: 'Cari bantuan tentang…',
       sort: {

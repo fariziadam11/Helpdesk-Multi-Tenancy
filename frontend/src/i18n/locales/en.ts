@@ -111,7 +111,7 @@ export default {
     },
     articles: {
       all: 'All Guides',
-      selected: 'Selected Articles',
+      selected: 'Selected Guides',
       count: '{count} articles',
       searchPlaceholder: 'Find help about...',
       sort: {
