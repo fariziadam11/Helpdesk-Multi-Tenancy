@@ -98,29 +98,29 @@ export default {
   landing: {
     hero: {
       badge: 'Knowledge Base',
-      title: 'Temukan Solusi untuk Setiap Pertanyaan',
-      description: 'Jelajahi artikel bantuan, panduan, dan dokumentasi untuk membantu Anda menggunakan platform dengan lebih efektif',
+      title: 'Butuh Bantuan? Mulai dari Sini',
+      description: 'Temukan panduan agar penggunaan Werk jadi #SemudahItu',
       stats: {
         articles: '{count} Artikel',
-        categories: '{count} Kategori',
+        categories: '{count} Modul',
         support: 'Bantuan 24/7',
       },
     },
     categories: {
-      title: 'Jelajahi Berdasarkan Kategori',
+      title: 'Pilih modul bantuan',
     },
     articles: {
-      all: 'Semua Artikel',
+      all: 'Semua Panduan',
       selected: 'Artikel yang Dipilih',
       count: '{count} artikel',
-      searchPlaceholder: 'Cari artikel...',
+      searchPlaceholder: 'Cari bantuan tentang…',
       sort: {
-        label: 'Urutkan:',
+        label: 'Tampilkan:',
         newest: 'Terbaru',
         popular: 'Terpopuler',
         alphabetical: 'A-Z',
       },
-      readMore: 'Baca',
+      readMore: 'Lihat',
       noResults: 'Tidak ada artikel yang ditemukan',
       empty: 'Belum ada artikel',
       resetFilter: 'Reset Filter',

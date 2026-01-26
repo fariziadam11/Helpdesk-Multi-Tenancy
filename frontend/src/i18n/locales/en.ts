@@ -98,29 +98,29 @@ export default {
   landing: {
     hero: {
       badge: 'Knowledge Base',
-      title: 'Find Solutions for Every Question',
-      description: 'Explore help articles, guides, and documentation to help you use the platform more effectively',
+      title: 'Need Help? Start Here',
+      description: 'Find out how to make using Werk #ThatEasy',
       stats: {
         articles: '{count} Articles',
-        categories: '{count} Categories',
+        categories: '{count} Modules',
         support: '24/7 Support',
       },
     },
     categories: {
-      title: 'Browse by Category',
+      title: 'Select the help module',
     },
     articles: {
-      all: 'All Articles',
+      all: 'All Guides',
       selected: 'Selected Articles',
       count: '{count} articles',
-      searchPlaceholder: 'Search articles...',
+      searchPlaceholder: 'Find help about...',
       sort: {
-        label: 'Sort:',
+        label: 'Display:',
         newest: 'Newest',
         popular: 'Most Popular',
         alphabetical: 'A-Z',
       },
-      readMore: 'Read',
+      readMore: 'See more',
       noResults: 'No articles found',
       empty: 'No articles yet',
       resetFilter: 'Reset Filter',

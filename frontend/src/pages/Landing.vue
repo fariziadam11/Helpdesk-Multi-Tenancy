@@ -18,12 +18,13 @@ const categories: ArticleCategory[] = [
   { id: 20, name: 'CRM' },
   { id: 16, name: 'ESS' },
   { id: 22, name: 'Intranet' },
-  { id: 23, name: 'Job Portal' },
   { id: 17, name: 'Kehadiran' },
   { id: 21, name: 'LMS' },
   { id: 24, name: 'Pengaturan Perusahaan' },
   { id: 19, name: 'Penggajian' },
   { id: 18, name: 'Personalia' },
+  { id: 32, name: 'Applicant' },
+  { id: 31, name: 'Employer' },
 ]
 
 const { articles, isLoading, error } = useAllArticles()
