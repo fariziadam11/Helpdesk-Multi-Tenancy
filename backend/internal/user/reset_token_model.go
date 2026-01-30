@@ -7,6 +7,7 @@ import (
 // ResetToken represents a password reset token in the database
 type ResetToken struct {
 	ID        string    `gorm:"type:char(36);primaryKey;default:(UUID())"`
+	TenantID  string    `gorm:"type:varchar(36);not null;index"` // Tenant identifier for multi-tenancy
 	UserID    string    `gorm:"type:char(36);not null"`
 	Token     string    `gorm:"type:varchar(255);not null;uniqueIndex"`
 	ExpiresAt time.Time `gorm:"not null"`

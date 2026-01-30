@@ -14,6 +14,12 @@ import (
 
 // AddComment handles POST /api/tickets/:id/comments
 func (h *Handler) AddComment(c *gin.Context) {
+	tenantID, ok := getTenantID(c)
+	if !ok {
+		response.ErrorWithCode(c, http.StatusBadRequest, errors.ErrCodeInvalidInput, "tenant not identified")
+		return
+	}
+
 	ticketIDParam := c.Param("id")
 	if ticketIDParam == "" {
 		response.ErrorWithCode(c, http.StatusBadRequest, errors.ErrCodeInvalidInput, "ticket id is required")
@@ -56,7 +62,7 @@ func (h *Handler) AddComment(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.service.AddTicketComment(c.Request.Context(), req, authorEmail)
+	resp, err := h.service.AddTicketComment(c.Request.Context(), tenantID, req, authorEmail)
 	if err != nil {
 		if appErr, ok := err.(*errors.AppError); ok {
 			response.AppError(c, appErr)

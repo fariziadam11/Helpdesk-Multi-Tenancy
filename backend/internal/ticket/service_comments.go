@@ -8,8 +8,8 @@ import (
 	"werk-ticketing/internal/errors"
 )
 
-func (s *service) AddTicketComment(ctx context.Context, req TicketCommentRequest, authorEmail string) (map[string]interface{}, error) {
-	user, err := s.userRepo.GetByEmail(ctx, authorEmail)
+func (s *service) AddTicketComment(ctx context.Context, tenantID string, req TicketCommentRequest, authorEmail string) (map[string]interface{}, error) {
+	user, err := s.userRepo.GetByEmail(ctx, tenantID, authorEmail)
 	if err != nil {
 		s.logger.WithError(err).WithField("authorEmail", authorEmail).Error("failed to get user by email")
 		return nil, errors.NewAppError(
@@ -56,4 +56,3 @@ func (s *service) GetTicketComments(ctx context.Context, ticketID int) (map[stri
 	}
 	return resp, nil
 }
-

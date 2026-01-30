@@ -7,46 +7,52 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"werk-ticketing/internal/invgate"
+	"werk-ticketing/internal/tenant"
 	"werk-ticketing/internal/user"
 )
 
 // Service exposes authentication related use cases.
+// All methods now require tenantID for multi-tenant support.
 type Service interface {
-	Register(ctx context.Context, req RegisterRequest) (*AuthResponse, error)
-	Login(ctx context.Context, req LoginRequest) (*AuthResponse, error)
-	RefreshToken(ctx context.Context, refreshToken string) (*AuthResponse, error)
+	Register(ctx context.Context, tenantID string, req RegisterRequest) (*AuthResponse, error)
+	Login(ctx context.Context, tenantID string, req LoginRequest) (*AuthResponse, error)
+	RefreshToken(ctx context.Context, tenantID, refreshToken string) (*AuthResponse, error)
 	RevokeToken(ctx context.Context, token string) error
 	ParseToken(token string) (*jwt.RegisteredClaims, error)
 	IsTokenBlacklisted(token string) bool
 	// Password reset methods
-	RequestPasswordReset(ctx context.Context, email string) error
+	RequestPasswordReset(ctx context.Context, tenantID, email string) error
 	ResetPassword(ctx context.Context, token, newPassword string) error
 }
 
 type service struct {
 	userRepo      user.Repository
+	tenantRepo    tenant.Repository
 	invgateClient invgate.Service
 	jwtSecret     []byte
 	blacklist     *TokenBlacklist
 	logger        *logrus.Logger
-	companyID     int
-	groupID       int
-	locationID    int
 	emailClient   EmailClient
 	frontendURL   string
 }
 
 // NewService instantiates auth service.
-func NewService(repo user.Repository, invgateClient invgate.Service, jwtSecret string, logger *logrus.Logger, companyID, groupID, locationID int, emailClient EmailClient, frontendURL string) Service {
+func NewService(
+	userRepo user.Repository,
+	tenantRepo tenant.Repository,
+	invgateClient invgate.Service,
+	jwtSecret string,
+	logger *logrus.Logger,
+	emailClient EmailClient,
+	frontendURL string,
+) Service {
 	return &service{
-		userRepo:      repo,
+		userRepo:      userRepo,
+		tenantRepo:    tenantRepo,
 		invgateClient: invgateClient,
 		jwtSecret:     []byte(jwtSecret),
 		blacklist:     NewTokenBlacklist(),
 		logger:        logger,
-		companyID:     companyID,
-		groupID:       groupID,
-		locationID:    locationID,
 		emailClient:   emailClient,
 		frontendURL:   frontendURL,
 	}

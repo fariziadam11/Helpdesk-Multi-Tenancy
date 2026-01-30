@@ -14,6 +14,12 @@ import (
 
 // List handles GET /api/tickets
 func (h *Handler) List(c *gin.Context) {
+	tenantID, ok := getTenantID(c)
+	if !ok {
+		response.ErrorWithCode(c, http.StatusBadRequest, errors.ErrCodeInvalidInput, "tenant not identified")
+		return
+	}
+
 	creatorID := c.Query("creator_id")
 	if creatorID == "" {
 		creatorID = middleware.GetUserEmail(c)
@@ -33,7 +39,7 @@ func (h *Handler) List(c *gin.Context) {
 		}
 	}
 
-	resp, err := h.service.GetTickets(c.Request.Context(), creatorID, page, limit)
+	resp, err := h.service.GetTickets(c.Request.Context(), tenantID, creatorID, page, limit)
 	if err != nil {
 		if appErr, ok := err.(*errors.AppError); ok {
 			response.AppError(c, appErr)

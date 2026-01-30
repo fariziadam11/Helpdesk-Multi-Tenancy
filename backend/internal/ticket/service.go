@@ -10,14 +10,15 @@ import (
 )
 
 // Service handles ticket business logic.
+// Methods that require user lookup now need tenantID for multi-tenant support.
 type Service interface {
-	CreateTicket(ctx context.Context, req TicketRequest, creatorEmail string) (map[string]interface{}, error)
-	GetTickets(ctx context.Context, creatorID string, page, limit int) (map[string]interface{}, error)
+	CreateTicket(ctx context.Context, tenantID string, req TicketRequest, creatorEmail string) (map[string]interface{}, error)
+	GetTickets(ctx context.Context, tenantID, creatorID string, page, limit int) (map[string]interface{}, error)
 	GetTicketDetail(ctx context.Context, ticketID string) (map[string]interface{}, error)
 	GetCategories(ctx context.Context) (map[string]interface{}, error)
 	GetTicketMeta(ctx context.Context) (map[string]interface{}, error)
 	GetStatuses(ctx context.Context) (map[string]interface{}, error)
-	AddTicketComment(ctx context.Context, req TicketCommentRequest, authorEmail string) (map[string]interface{}, error)
+	AddTicketComment(ctx context.Context, tenantID string, req TicketCommentRequest, authorEmail string) (map[string]interface{}, error)
 	GetTicketComments(ctx context.Context, ticketID int) (map[string]interface{}, error)
 	GetTicketAttachment(ctx context.Context, attachmentID string) ([]byte, string, string, error)
 	GetTicketAttachmentInfo(ctx context.Context, attachmentID string) (map[string]interface{}, error)
@@ -29,9 +30,9 @@ type Service interface {
 }
 
 type service struct {
-	client     invgate.Service
-	userRepo   user.Repository
-	logger     *logrus.Logger
+	client   invgate.Service
+	userRepo user.Repository
+	logger   *logrus.Logger
 }
 
 // NewService creates a new ticket service.

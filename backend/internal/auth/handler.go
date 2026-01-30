@@ -20,15 +20,30 @@ func NewHandler(service Service) *Handler {
 	return &Handler{service: service}
 }
 
+// getTenantID extracts tenant ID from gin context (set by tenant middleware)
+func getTenantID(c *gin.Context) (string, bool) {
+	tenantID, exists := c.Get("tenant_id")
+	if !exists {
+		return "", false
+	}
+	return tenantID.(string), true
+}
+
 // Register handles POST /auth/register
 func (h *Handler) Register(c *gin.Context) {
+	tenantID, ok := getTenantID(c)
+	if !ok {
+		response.ErrorWithCode(c, http.StatusBadRequest, errors.ErrCodeInvalidInput, "tenant not identified")
+		return
+	}
+
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.ErrorWithCode(c, http.StatusBadRequest, errors.ErrCodeInvalidInput, "invalid JSON body")
 		return
 	}
 
-	resp, err := h.service.Register(c.Request.Context(), req)
+	resp, err := h.service.Register(c.Request.Context(), tenantID, req)
 	if err != nil {
 		if appErr, ok := err.(*errors.AppError); ok {
 			response.AppError(c, appErr)
@@ -43,13 +58,19 @@ func (h *Handler) Register(c *gin.Context) {
 
 // Login handles POST /auth/login
 func (h *Handler) Login(c *gin.Context) {
+	tenantID, ok := getTenantID(c)
+	if !ok {
+		response.ErrorWithCode(c, http.StatusBadRequest, errors.ErrCodeInvalidInput, "tenant not identified")
+		return
+	}
+
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.ErrorWithCode(c, http.StatusBadRequest, errors.ErrCodeInvalidInput, "invalid JSON body")
 		return
 	}
 
-	resp, err := h.service.Login(c.Request.Context(), req)
+	resp, err := h.service.Login(c.Request.Context(), tenantID, req)
 	if err != nil {
 		if appErr, ok := err.(*errors.AppError); ok {
 			response.AppError(c, appErr)
@@ -64,13 +85,19 @@ func (h *Handler) Login(c *gin.Context) {
 
 // RefreshToken handles POST /auth/refresh
 func (h *Handler) RefreshToken(c *gin.Context) {
+	tenantID, ok := getTenantID(c)
+	if !ok {
+		response.ErrorWithCode(c, http.StatusBadRequest, errors.ErrCodeInvalidInput, "tenant not identified")
+		return
+	}
+
 	var req RefreshTokenRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.ErrorWithCode(c, http.StatusBadRequest, errors.ErrCodeInvalidInput, "invalid JSON body")
 		return
 	}
 
-	resp, err := h.service.RefreshToken(c.Request.Context(), req.RefreshToken)
+	resp, err := h.service.RefreshToken(c.Request.Context(), tenantID, req.RefreshToken)
 	if err != nil {
 		if appErr, ok := err.(*errors.AppError); ok {
 			response.AppError(c, appErr)
@@ -113,13 +140,19 @@ func (h *Handler) RevokeToken(c *gin.Context) {
 
 // ForgotPassword handles POST /auth/forgot-password
 func (h *Handler) ForgotPassword(c *gin.Context) {
+	tenantID, ok := getTenantID(c)
+	if !ok {
+		response.ErrorWithCode(c, http.StatusBadRequest, errors.ErrCodeInvalidInput, "tenant not identified")
+		return
+	}
+
 	var req ForgotPasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.ErrorWithCode(c, http.StatusBadRequest, errors.ErrCodeInvalidInput, "invalid JSON body")
 		return
 	}
 
-	err := h.service.RequestPasswordReset(c.Request.Context(), req.Email)
+	err := h.service.RequestPasswordReset(c.Request.Context(), tenantID, req.Email)
 	if err != nil {
 		if appErr, ok := err.(*errors.AppError); ok {
 			response.AppError(c, appErr)

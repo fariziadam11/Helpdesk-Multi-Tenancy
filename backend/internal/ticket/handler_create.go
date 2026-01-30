@@ -15,6 +15,12 @@ import (
 
 // Create handles POST /api/tickets
 func (h *Handler) Create(c *gin.Context) {
+	tenantID, ok := getTenantID(c)
+	if !ok {
+		response.ErrorWithCode(c, http.StatusBadRequest, errors.ErrCodeInvalidInput, "tenant not identified")
+		return
+	}
+
 	var (
 		req TicketRequest
 		err error
@@ -58,7 +64,7 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.service.CreateTicket(c.Request.Context(), req, creatorEmail)
+	resp, err := h.service.CreateTicket(c.Request.Context(), tenantID, req, creatorEmail)
 	if err != nil {
 		if appErr, ok := err.(*errors.AppError); ok {
 			response.AppError(c, appErr)

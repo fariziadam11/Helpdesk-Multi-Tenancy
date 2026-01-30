@@ -42,13 +42,13 @@ func (s *service) ParseToken(token string) (*jwt.RegisteredClaims, error) {
 	return claims, nil
 }
 
-func (s *service) RefreshToken(ctx context.Context, refreshToken string) (*AuthResponse, error) {
+func (s *service) RefreshToken(ctx context.Context, tenantID, refreshToken string) (*AuthResponse, error) {
 	claims, err := s.ParseToken(refreshToken)
 	if err != nil {
 		return nil, err
 	}
 
-	user, err := s.userRepo.GetByEmail(ctx, claims.Subject)
+	user, err := s.userRepo.GetByEmail(ctx, tenantID, claims.Subject)
 	if err != nil {
 		s.logger.WithError(err).Error("failed to get user for token refresh")
 		return nil, errors.NewAppError(
@@ -122,6 +122,7 @@ func (s *service) buildToken(u *user.User) (string, error) {
 		Subject:   u.Email,
 		IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 		ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(constants.JWTExpiration)),
+		Audience:  jwt.ClaimStrings{u.TenantID}, // Include tenantID in token
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -133,6 +134,7 @@ func (s *service) buildRefreshToken(u *user.User) (string, error) {
 		Subject:   u.Email,
 		IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 		ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(constants.JWTRefreshExpiration)),
+		Audience:  jwt.ClaimStrings{u.TenantID}, // Include tenantID in token
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

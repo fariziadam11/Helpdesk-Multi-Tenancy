@@ -7,7 +7,7 @@ import (
 	"werk-ticketing/internal/errors"
 )
 
-func (s *service) GetTickets(ctx context.Context, creatorID string, page, limit int) (map[string]interface{}, error) {
+func (s *service) GetTickets(ctx context.Context, tenantID, creatorID string, page, limit int) (map[string]interface{}, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -19,7 +19,7 @@ func (s *service) GetTickets(ctx context.Context, creatorID string, page, limit 
 	}
 
 	// Get user from database to retrieve InvGateUserID
-	user, err := s.userRepo.GetByEmail(ctx, creatorID)
+	user, err := s.userRepo.GetByEmail(ctx, tenantID, creatorID)
 	if err != nil {
 		s.logger.WithError(err).
 			WithField("email", creatorID).

@@ -10,8 +10,8 @@ import (
 	"werk-ticketing/internal/invgate"
 )
 
-func (s *service) CreateTicket(ctx context.Context, req TicketRequest, creatorEmail string) (map[string]interface{}, error) {
-	user, err := s.userRepo.GetByEmail(ctx, creatorEmail)
+func (s *service) CreateTicket(ctx context.Context, tenantID string, req TicketRequest, creatorEmail string) (map[string]interface{}, error) {
+	user, err := s.userRepo.GetByEmail(ctx, tenantID, creatorEmail)
 	if err != nil {
 		s.logger.WithError(err).WithField("creatorEmail", creatorEmail).Error("failed to get user by email")
 		return nil, errors.NewAppError(

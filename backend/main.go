@@ -19,6 +19,7 @@ import (
 	"werk-ticketing/internal/email"
 	"werk-ticketing/internal/invgate"
 	"werk-ticketing/internal/router"
+	"werk-ticketing/internal/tenant"
 	"werk-ticketing/internal/ticket"
 	"werk-ticketing/internal/user"
 )
@@ -49,6 +50,7 @@ func main() {
 	// Auto migrate all models
 	// This ensures all tables are created/updated when the application starts
 	if err := db.AutoMigrate(
+		&tenant.Tenant{},   // Tenants table
 		&user.User{},       // Users table
 		&user.ResetToken{}, // Password reset tokens table
 	); err != nil {
@@ -58,9 +60,12 @@ func main() {
 	// Configure logger based on environment
 	logger := configureLogger(cfg)
 
+	// Initialize repositories
+	tenantRepo := tenant.NewRepository(db)
+	userRepo := user.NewRepository(db)
+
 	// Initialize services
 	invgateClient := invgate.NewService(cfg)
-	userRepo := user.NewRepository(db)
 	ticketService := ticket.NewService(invgateClient, userRepo, logger)
 	ticketHandler := ticket.NewHandler(ticketService)
 
@@ -69,12 +74,10 @@ func main() {
 
 	authService := auth.NewService(
 		userRepo,
+		tenantRepo,
 		invgateClient,
 		cfg.JWTSecret,
 		logger,
-		cfg.ArmMadaCompanyID,
-		cfg.ArmMadaGroupID,
-		cfg.ArmMadaLocationID,
 		emailClient,
 		cfg.FrontendURL,
 	)
@@ -82,7 +85,7 @@ func main() {
 	userHandler := user.NewHandler(userRepo)
 
 	// Setup router
-	appRouter := router.NewRouter(authHandler, ticketHandler, userHandler, authService, logger)
+	appRouter := router.NewRouter(authHandler, ticketHandler, userHandler, authService, tenantRepo, logger)
 	ginRouter := appRouter.SetupRoutes()
 
 	// Create HTTP server with timeouts

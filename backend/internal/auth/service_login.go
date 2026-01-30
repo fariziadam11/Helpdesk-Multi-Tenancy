@@ -9,7 +9,7 @@ import (
 	"werk-ticketing/internal/validator"
 )
 
-func (s *service) Login(ctx context.Context, req LoginRequest) (*AuthResponse, error) {
+func (s *service) Login(ctx context.Context, tenantID string, req LoginRequest) (*AuthResponse, error) {
 	if !validator.ValidateRequired(req.Email) || !validator.ValidateRequired(req.Password) {
 		return nil, errors.NewAppError(
 			errors.ErrCodeInvalidInput,
@@ -26,7 +26,7 @@ func (s *service) Login(ctx context.Context, req LoginRequest) (*AuthResponse, e
 		)
 	}
 
-	existing, err := s.userRepo.GetByEmail(ctx, req.Email)
+	existing, err := s.userRepo.GetByEmail(ctx, tenantID, req.Email)
 	if err != nil {
 		s.logger.WithError(err).Error("failed to get user")
 		return nil, errors.NewAppError(

@@ -12,9 +12,9 @@ import (
 )
 
 // RequestPasswordReset handles password reset request
-func (s *service) RequestPasswordReset(ctx context.Context, email string) error {
-	// Find user by email
-	u, err := s.userRepo.GetByEmail(ctx, email)
+func (s *service) RequestPasswordReset(ctx context.Context, tenantID, email string) error {
+	// Find user by email within tenant
+	u, err := s.userRepo.GetByEmail(ctx, tenantID, email)
 	if err != nil {
 		s.logger.WithError(err).Error("failed to get user by email")
 		return err
@@ -35,12 +35,13 @@ func (s *service) RequestPasswordReset(ctx context.Context, email string) error 
 
 	// Create reset token record with 1 hour expiration
 	resetToken := &user.ResetToken{
+		TenantID:  tenantID,
 		UserID:    u.ID,
 		Token:     token,
 		ExpiresAt: time.Now().Add(1 * time.Hour),
 	}
 
-	if err := s.userRepo.CreateResetToken(ctx, resetToken); err != nil {
+	if err := s.userRepo.CreateResetToken(ctx, tenantID, resetToken); err != nil {
 		s.logger.WithError(err).Error("failed to create reset token")
 		return errors.NewAppError(errors.ErrCodeInternal, "failed to create reset token", err)
 	}
@@ -60,7 +61,7 @@ func (s *service) RequestPasswordReset(ctx context.Context, email string) error 
 
 // ResetPassword handles password reset with token
 func (s *service) ResetPassword(ctx context.Context, token, newPassword string) error {
-	// Get reset token
+	// Get reset token (token is globally unique, contains tenantID)
 	resetToken, err := s.userRepo.GetResetToken(ctx, token)
 	if err != nil {
 		s.logger.WithError(err).Error("failed to get reset token")
@@ -85,8 +86,8 @@ func (s *service) ResetPassword(ctx context.Context, token, newPassword string) 
 		return errors.NewAppError(errors.ErrCodeInternal, "failed to hash password", err)
 	}
 
-	// Update user password
-	if err := s.userRepo.UpdatePassword(ctx, resetToken.UserID, string(hashedPassword)); err != nil {
+	// Update user password within tenant
+	if err := s.userRepo.UpdatePassword(ctx, resetToken.TenantID, resetToken.UserID, string(hashedPassword)); err != nil {
 		s.logger.WithError(err).Error("failed to update password")
 		return errors.NewAppError(errors.ErrCodeInternal, "failed to update password", err)
 	}

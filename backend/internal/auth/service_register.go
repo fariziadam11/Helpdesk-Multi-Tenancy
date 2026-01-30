@@ -10,11 +10,23 @@ import (
 
 	"werk-ticketing/internal/errors"
 	"werk-ticketing/internal/invgate"
+	"werk-ticketing/internal/tenant"
 	"werk-ticketing/internal/user"
 	"werk-ticketing/internal/validator"
 )
 
-func (s *service) Register(ctx context.Context, req RegisterRequest) (*AuthResponse, error) {
+func (s *service) Register(ctx context.Context, tenantID string, req RegisterRequest) (*AuthResponse, error) {
+	// Fetch tenant configuration for InvGate credentials
+	tenant, err := s.tenantRepo.FindByID(ctx, tenantID)
+	if err != nil {
+		s.logger.WithError(err).Error("failed to get tenant")
+		return nil, errors.NewAppError(
+			errors.ErrCodeInternal,
+			"failed to get tenant configuration",
+			err,
+		)
+	}
+
 	missingFields := validator.ValidateRequiredFields(map[string]string{
 		"name":     req.Name,
 		"lastname": req.LastName,
@@ -45,7 +57,7 @@ func (s *service) Register(ctx context.Context, req RegisterRequest) (*AuthRespo
 		)
 	}
 
-	existing, err := s.userRepo.GetByEmail(ctx, req.Email)
+	existing, err := s.userRepo.GetByEmail(ctx, tenantID, req.Email)
 	if err != nil {
 		s.logger.WithError(err).Error("failed to check existing user")
 		return nil, errors.NewAppError(
@@ -108,6 +120,7 @@ func (s *service) Register(ctx context.Context, req RegisterRequest) (*AuthRespo
 	}
 
 	newUser := &user.User{
+		TenantID:      tenantID,
 		Name:          req.Name,
 		LastName:      req.LastName,
 		Email:         req.Email,
@@ -117,7 +130,7 @@ func (s *service) Register(ctx context.Context, req RegisterRequest) (*AuthRespo
 		UpdatedBy:     req.Email,
 	}
 
-	if err := s.userRepo.Create(ctx, newUser); err != nil {
+	if err := s.userRepo.Create(ctx, tenantID, newUser); err != nil {
 		var dupKeyErr *user.DuplicateKeyError
 		if stdErrors.As(err, &dupKeyErr) {
 			if compErr := s.invgateClient.DeleteUser(ctx, invGateUserID); compErr != nil {
@@ -164,7 +177,7 @@ func (s *service) Register(ctx context.Context, req RegisterRequest) (*AuthRespo
 		)
 	}
 
-	if err := s.assignUserToDefaultScopes(ctx, invGateUserID); err != nil {
+	if err := s.assignUserToDefaultScopes(ctx, tenant, invGateUserID); err != nil {
 		s.logger.WithError(err).
 			WithField("invGateUserID", invGateUserID).
 			WithField("email", req.Email).
@@ -176,7 +189,7 @@ func (s *service) Register(ctx context.Context, req RegisterRequest) (*AuthRespo
 				Error("compensation failed: could not delete user from InvGate")
 		}
 
-		if compErr := s.userRepo.Delete(ctx, newUser.ID); compErr != nil {
+		if compErr := s.userRepo.Delete(ctx, tenantID, newUser.ID); compErr != nil {
 			s.logger.WithError(compErr).
 				WithField("userID", newUser.ID).
 				Error("compensation failed: could not delete user from local database")
@@ -220,23 +233,24 @@ func (s *service) Register(ctx context.Context, req RegisterRequest) (*AuthRespo
 	}, nil
 }
 
-func (s *service) assignUserToDefaultScopes(ctx context.Context, invGateUserID int) error {
+// assignUserToDefaultScopes assigns a user to tenant-specific InvGate scopes
+func (s *service) assignUserToDefaultScopes(ctx context.Context, t *tenant.Tenant, invGateUserID int) error {
 	userIDs := []int{invGateUserID}
 
-	if s.companyID > 0 {
-		if err := s.invgateClient.AssignUserToCompany(ctx, s.companyID, userIDs); err != nil {
+	if t.InvGateCompanyID > 0 {
+		if err := s.invgateClient.AssignUserToCompany(ctx, t.InvGateCompanyID, userIDs); err != nil {
 			return fmt.Errorf("assign user to company: %w", err)
 		}
 	}
 
-	if s.groupID > 0 {
-		if err := s.invgateClient.AssignUserToGroup(ctx, s.groupID, userIDs); err != nil {
+	if t.InvGateGroupID > 0 {
+		if err := s.invgateClient.AssignUserToGroup(ctx, t.InvGateGroupID, userIDs); err != nil {
 			return fmt.Errorf("assign user to group: %w", err)
 		}
 	}
 
-	if s.locationID > 0 {
-		if err := s.invgateClient.AssignUserToLocation(ctx, s.locationID, userIDs); err != nil {
+	if t.InvGateLocationID > 0 {
+		if err := s.invgateClient.AssignUserToLocation(ctx, t.InvGateLocationID, userIDs); err != nil {
 			return fmt.Errorf("assign user to location: %w", err)
 		}
 	}

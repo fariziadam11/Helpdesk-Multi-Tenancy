@@ -39,6 +39,13 @@ type UserResponse struct {
 
 // UpdateProfile handles PUT /users/profile
 func (h *Handler) UpdateProfile(c *gin.Context) {
+	// Get tenant ID from context (set by tenant middleware)
+	tenantID, exists := c.Get("tenant_id")
+	if !exists {
+		response.Error(c, http.StatusBadRequest, "Tenant not identified")
+		return
+	}
+
 	// Get user email from context (set by auth middleware)
 	userEmail, exists := c.Get("userEmail")
 	if !exists {
@@ -52,8 +59,8 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	// Get existing user by email
-	user, err := h.repo.GetByEmail(c.Request.Context(), userEmail.(string))
+	// Get existing user by email within tenant
+	user, err := h.repo.GetByEmail(c.Request.Context(), tenantID.(string), userEmail.(string))
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to get user")
 		return
@@ -80,8 +87,8 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 		user.Password = string(hashedPassword)
 	}
 
-	// Update user in database
-	if err := h.repo.Update(c.Request.Context(), user); err != nil {
+	// Update user in database within tenant
+	if err := h.repo.Update(c.Request.Context(), tenantID.(string), user); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to update profile")
 		return
 	}

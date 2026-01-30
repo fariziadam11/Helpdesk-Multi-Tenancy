@@ -7,6 +7,7 @@ import (
 	"werk-ticketing/internal/auth"
 	"werk-ticketing/internal/constants"
 	"werk-ticketing/internal/middleware"
+	"werk-ticketing/internal/tenant"
 	"werk-ticketing/internal/ticket"
 	"werk-ticketing/internal/user"
 )
@@ -17,6 +18,7 @@ type Router struct {
 	ticketHandler *ticket.Handler
 	userHandler   *user.Handler
 	authService   auth.Service
+	tenantRepo    tenant.Repository
 	logger        *logrus.Logger
 }
 
@@ -26,6 +28,7 @@ func NewRouter(
 	ticketHandler *ticket.Handler,
 	userHandler *user.Handler,
 	authService auth.Service,
+	tenantRepo tenant.Repository,
 	logger *logrus.Logger,
 ) *Router {
 	return &Router{
@@ -33,6 +36,7 @@ func NewRouter(
 		ticketHandler: ticketHandler,
 		userHandler:   userHandler,
 		authService:   authService,
+		tenantRepo:    tenantRepo,
 		logger:        logger,
 	}
 }
@@ -55,6 +59,10 @@ func (r *Router) SetupRoutes() *gin.Engine {
 
 	// API versioning: /api/v1
 	apiV1 := router.Group("/api/v1")
+
+	// Apply tenant middleware to all API routes
+	// Tenant is identified from X-Tenant-ID header
+	apiV1.Use(middleware.WithTenant(r.tenantRepo, middleware.TenantFromHeader))
 
 	// Setup route groups
 	r.setupAuthRoutes(apiV1)
@@ -84,7 +92,7 @@ func (r *Router) SetupRoutes() *gin.Engine {
 		articleRoutes.GET("", r.ticketHandler.GetArticlesByCategory)
 	}
 
-	// Health check endpoint (no versioning)
+	// Health check endpoint (no versioning, no tenant required)
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status":  "ok",
