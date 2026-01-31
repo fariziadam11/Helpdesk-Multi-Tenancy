@@ -83,9 +83,10 @@ func main() {
 	)
 	authHandler := auth.NewHandler(authService)
 	userHandler := user.NewHandler(userRepo)
+	tenantHandler := tenant.NewHandler(tenantRepo)
 
 	// Setup router
-	appRouter := router.NewRouter(authHandler, ticketHandler, userHandler, authService, tenantRepo, logger)
+	appRouter := router.NewRouter(authHandler, ticketHandler, userHandler, tenantHandler, authService, tenantRepo, logger)
 	ginRouter := appRouter.SetupRoutes()
 
 	// Create HTTP server with timeouts

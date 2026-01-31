@@ -2,7 +2,7 @@
 -- This table stores all tenant configurations including InvGate credentials
 
 CREATE TABLE IF NOT EXISTS tenants (
-    id VARCHAR(36) PRIMARY KEY,
+    id CHAR(36) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     slug VARCHAR(100) UNIQUE NOT NULL,
     

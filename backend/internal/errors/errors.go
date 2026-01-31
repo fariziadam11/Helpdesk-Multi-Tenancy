@@ -15,18 +15,20 @@ const (
 	ErrCodeExternalService    = "EXTERNAL_SERVICE_ERROR"
 	ErrCodeEmailAlreadyExist  = "EMAIL_ALREADY_EXIST"
 	ErrCodeInvalidCredentials = "INVALID_CREDENTIALS"
+	ErrCodeConflict           = "CONFLICT"
 )
 
 // Predefined errors
 var (
-	ErrInvalidInput      = errors.New("invalid input")
-	ErrNotFound          = errors.New("resource not found")
-	ErrUnauthorized      = errors.New("unauthorized")
-	ErrForbidden         = errors.New("forbidden")
-	ErrInternal          = errors.New("internal server error")
-	ErrExternalService   = errors.New("external service error")
-	ErrEmailAlreadyExist = errors.New("email already registered")
+	ErrInvalidInput       = errors.New("invalid input")
+	ErrNotFound           = errors.New("resource not found")
+	ErrUnauthorized       = errors.New("unauthorized")
+	ErrForbidden          = errors.New("forbidden")
+	ErrInternal           = errors.New("internal server error")
+	ErrExternalService    = errors.New("external service error")
+	ErrEmailAlreadyExist  = errors.New("email already registered")
 	ErrInvalidCredentials = errors.New("invalid credentials")
+	ErrConflict           = errors.New("resource already exists")
 )
 
 // AppError represents an application error with context
@@ -63,4 +65,3 @@ func WrapError(message string, err error) error {
 	}
 	return fmt.Errorf("%s: %w", message, err)
 }
-

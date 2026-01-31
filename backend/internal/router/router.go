@@ -17,6 +17,7 @@ type Router struct {
 	authHandler   *auth.Handler
 	ticketHandler *ticket.Handler
 	userHandler   *user.Handler
+	tenantHandler *tenant.Handler
 	authService   auth.Service
 	tenantRepo    tenant.Repository
 	logger        *logrus.Logger
@@ -27,6 +28,7 @@ func NewRouter(
 	authHandler *auth.Handler,
 	ticketHandler *ticket.Handler,
 	userHandler *user.Handler,
+	tenantHandler *tenant.Handler,
 	authService auth.Service,
 	tenantRepo tenant.Repository,
 	logger *logrus.Logger,
@@ -35,6 +37,7 @@ func NewRouter(
 		authHandler:   authHandler,
 		ticketHandler: ticketHandler,
 		userHandler:   userHandler,
+		tenantHandler: tenantHandler,
 		authService:   authService,
 		tenantRepo:    tenantRepo,
 		logger:        logger,
@@ -67,6 +70,7 @@ func (r *Router) SetupRoutes() *gin.Engine {
 	// Setup route groups
 	r.setupAuthRoutes(apiV1)
 	r.setupTicketRoutes(apiV1)
+	r.setupTenantRoutes(apiV1)
 
 	// User endpoint (proxy to InvGate user API, requires auth)
 	userRoutes := apiV1.Group("/users")

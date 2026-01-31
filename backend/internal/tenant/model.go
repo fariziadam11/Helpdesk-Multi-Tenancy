@@ -5,7 +5,7 @@ import "time"
 // Tenant represents a tenant/organization in the multi-tenant system.
 // Each tenant has its own InvGate credentials and branding configuration.
 type Tenant struct {
-	ID   string `gorm:"type:varchar(36);primaryKey" json:"id"`
+	ID   string `gorm:"type:char(36);primaryKey" json:"id"`
 	Name string `gorm:"size:255;not null" json:"name"`
 	Slug string `gorm:"size:100;not null;uniqueIndex" json:"slug"`
 
