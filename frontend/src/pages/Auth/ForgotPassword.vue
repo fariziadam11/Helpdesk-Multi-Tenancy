@@ -17,7 +17,7 @@ const isSuccess = ref(false)
 
 const handleSubmit = async () => {
   if (!email.value.trim()) {
-    toast.error('Email harus diisi')
+    toast.error('Email harus diisi!')
     return
   }
 
