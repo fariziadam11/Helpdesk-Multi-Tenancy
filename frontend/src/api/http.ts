@@ -37,12 +37,29 @@ export const http = axios.create({
   },
 })
 
+/**
+ * Get tenant ID from cookie
+ * This function is synchronous to work in request interceptor
+ */
+function getTenantId(): string | null {
+  const cookieId = getCookie('tenant_id')
+  return cookieId || null
+}
+
 http.interceptors.request.use(
   (config) => {
+    // Add auth token
     const token = getCookie(COOKIE_NAMES.ACCESS_TOKEN)
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    
+    // Add tenant ID header only if valid
+    const tenantId = getTenantId()
+    if (tenantId && tenantId !== 'undefined' && tenantId !== 'null') {
+      config.headers['X-Tenant-ID'] = tenantId
+    }
+    
     return config
   },
   (error) => {

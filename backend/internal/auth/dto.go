@@ -6,6 +6,7 @@ type RegisterRequest struct {
 	LastName string `json:"lastname" binding:"required,min=1,max=100" validate:"required,min=1,max=100"`
 	Email    string `json:"email" binding:"required,email" validate:"required,email"`
 	Password string `json:"password" binding:"required,min=6" validate:"required,min=6"`
+	TenantID string `json:"tenant_id"` // Optional, if empty will use default or error
 }
 
 // LoginRequest incoming body.
@@ -21,6 +22,7 @@ type AuthResponse struct {
 	Name         string `json:"name"`
 	LastName     string `json:"lastname"`
 	Email        string `json:"email"`
+	TenantID     string `json:"tenant_id"`
 }
 
 // RefreshTokenRequest request for token refresh

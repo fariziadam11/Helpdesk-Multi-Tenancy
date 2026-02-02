@@ -3,21 +3,54 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
+import { useTenantBranding } from '@/composables/useTenantBranding'
 import { authApi } from '@/api/auth'
 import { logger } from '@/utils/logger'
 import { useToast } from '@/composables/useToast'
 import Button from 'primevue/button'
+import TenantSwitcher from './TenantSwitcher.vue'
 import LanguageSwitcher from './LanguageSwitcher.vue'
 
 const { t } = useI18n()
 const router = useRouter()
 const authStore = useAuthStore()
 const toast = useToast()
+const { logoUrl, primaryColor, tenantName } = useTenantBranding()
+import { useTenantStore } from '@/stores/tenant'
+const tenantStore = useTenantStore()
+
+const isSuperAdmin = computed(() => {
+  if (!authStore.user) return false
+  // Temp logic: Allow if user is in 'default' tenant or has admin email
+  return authStore.user.email.includes('admin') || tenantStore.tenantSlug === 'default'
+})
 
 const isUserSidebarOpen = ref(false)
 const windowWidth = ref(window.innerWidth)
 
 const isMobile = computed(() => windowWidth.value <= 768)
+
+// Dynamic CSS variables for theming
+const headerStyle = computed(() => ({
+  backgroundColor: primaryColor.value,
+}))
+
+const sidebarStyle = computed(() => ({
+  backgroundColor: adjustBrightness(primaryColor.value, -15),
+}))
+
+// Helper to adjust color brightness
+function adjustBrightness(hex: string, percent: number): string {
+  hex = hex.replace(/^#/, '')
+  let r = parseInt(hex.substring(0, 2), 16)
+  let g = parseInt(hex.substring(2, 4), 16)
+  let b = parseInt(hex.substring(4, 6), 16)
+  r = Math.min(255, Math.max(0, r + (r * percent) / 100))
+  g = Math.min(255, Math.max(0, g + (g * percent) / 100))
+  b = Math.min(255, Math.max(0, b + (b * percent) / 100))
+  const toHex = (n: number) => Math.round(n).toString(16).padStart(2, '0')
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`
+}
 
 const updateWindowWidth = () => {
   windowWidth.value = window.innerWidth
@@ -63,11 +96,11 @@ const handleLogout = async () => {
 
 <template>
   <div>
-    <header class="app-header">
+    <header class="app-header" :style="headerStyle">
       <div class="header-content">
         <div class="header-left">
           <button class="brand" type="button" @click="router.push('/dashboard')">
-            <img src="/logo_white.svg" alt="Werk logo" class="brand-logo" />
+            <img :src="logoUrl" :alt="tenantName + ' logo'" class="brand-logo" />
           </button>
           <nav class="header-nav">
             <button
@@ -94,9 +127,19 @@ const handleLogout = async () => {
             >
               {{ t('nav.articles') }}
             </button>
+            <button
+              v-if="isSuperAdmin"
+              type="button"
+              class="nav-link"
+              :class="{ active: router.currentRoute.value.path.startsWith('/admin/tenants') }"
+              @click="router.push('/admin/tenants')"
+            >
+              <i class="pi pi-building mr-1"></i> Tenants
+            </button>
           </nav>
         </div>
         <div class="header-right">
+          <TenantSwitcher />
           <LanguageSwitcher />
           <button
             v-if="authStore.user"
@@ -123,7 +166,7 @@ const handleLogout = async () => {
     ></div>
 
     <!-- User Sidebar -->
-    <aside v-if="authStore.user" class="user-sidebar" :class="{ open: isUserSidebarOpen }">
+    <aside v-if="authStore.user" class="user-sidebar" :class="{ open: isUserSidebarOpen }" :style="sidebarStyle">
       <div class="user-sidebar-header">
         <span class="user-sidebar-title">{{ t('header.menu') }}</span>
         <button type="button" class="user-sidebar-close" @click="closeUserSidebar">

@@ -65,6 +65,16 @@ export const useAuthStore = defineStore('auth', () => {
       secure: import.meta.env.PROD,
       sameSite: COOKIE_OPTIONS.SAME_SITE,
     })
+
+    // Store tenant ID for API requests
+    if (authData.tenant_id) {
+      setCookie('tenant_id', authData.tenant_id, {
+        expires: COOKIE_OPTIONS.EXPIRES_DAYS,
+        path: COOKIE_OPTIONS.PATH,
+        secure: import.meta.env.PROD,
+        sameSite: COOKIE_OPTIONS.SAME_SITE,
+      })
+    }
   }
 
   function clearAuth() {
@@ -75,6 +85,7 @@ export const useAuthStore = defineStore('auth', () => {
     removeCookie(COOKIE_NAMES.ACCESS_TOKEN, { path: COOKIE_OPTIONS.PATH })
     removeCookie(COOKIE_NAMES.REFRESH_TOKEN, { path: COOKIE_OPTIONS.PATH })
     removeCookie(COOKIE_NAMES.USER, { path: COOKIE_OPTIONS.PATH })
+    removeCookie('tenant_id', { path: COOKIE_OPTIONS.PATH })
   }
 
   function initializeAuth() {

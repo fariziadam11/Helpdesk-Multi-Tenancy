@@ -1,10 +1,21 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useTenantBranding } from '@/composables/useTenantBranding'
 import LanguageSwitcher from './LanguageSwitcher.vue'
 
 const { t } = useI18n()
 const router = useRouter()
+const { logoUrl, primaryColor, tenantName } = useTenantBranding()
+
+const headerStyle = computed(() => ({
+  backgroundColor: primaryColor.value,
+}))
+
+const registerBtnStyle = computed(() => ({
+  color: primaryColor.value,
+}))
 
 const goToLanding = () => {
   router.push('/')
@@ -20,16 +31,16 @@ const goToRegister = () => {
 </script>
 
 <template>
-  <header class="guest-header">
+  <header class="guest-header" :style="headerStyle">
     <div class="header-content">
       <div class="header-left">
         <button class="brand" type="button" @click="goToLanding">
-          <img src="/logo_white.svg" alt="Werk logo" class="brand-logo" />
+          <img :src="logoUrl" :alt="tenantName + ' logo'" class="brand-logo" />
         </button>
       </div>
       <div class="header-right">
         <LanguageSwitcher />
-        <button class="register-btn" @click="goToRegister">
+        <button class="register-btn" :style="registerBtnStyle" @click="goToRegister">
           {{ t('nav.register') }}
         </button>
         <button class="login-btn" @click="goToLogin">

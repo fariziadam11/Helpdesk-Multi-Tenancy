@@ -2,13 +2,15 @@ package router
 
 import "github.com/gin-gonic/gin"
 
-// setupTenantRoutes configures tenant management routes
-// These are admin routes for managing tenants
-func (r *Router) setupTenantRoutes(api *gin.RouterGroup) {
+// setupPublicTenantRoutes configures public tenant routes (no auth or tenant middleware required)
+func (r *Router) setupPublicTenantRoutes(api *gin.RouterGroup) {
 	// Public endpoint for getting tenant branding info (no auth required)
 	// Used by frontend to display tenant-specific branding
 	api.GET("/tenants/:slug/info", r.tenantHandler.GetPublicInfo)
+}
 
+// setupAdminTenantRoutes configures admin tenant management routes (requires tenant context and auth)
+func (r *Router) setupAdminTenantRoutes(api *gin.RouterGroup) {
 	// Admin routes for tenant management (require authentication)
 	adminRoutes := api.Group("/admin/tenants")
 	// TODO: Add admin role check middleware here

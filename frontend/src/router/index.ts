@@ -92,6 +92,26 @@ const router = createRouter({
       props: true,
       meta: { requiresAuth: false }, // Allow guest access to article detail
     },
+    // Admin Routes
+    {
+      path: '/admin/tenants',
+      name: 'admin-tenants',
+      component: () => import('@/pages/Admin/Tenants/List.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/admin/tenants/create',
+      name: 'create-tenant',
+      component: () => import('@/pages/Admin/Tenants/Form.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/admin/tenants/:id/edit',
+      name: 'edit-tenant',
+      component: () => import('@/pages/Admin/Tenants/Form.vue'),
+      props: true,
+      meta: { requiresAuth: true },
+    },
   ],
 })
 

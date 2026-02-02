@@ -8,7 +8,7 @@ import (
 func CORS() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		origin := c.GetHeader("Origin")
-		
+
 		// Allow specific origins or all origins in development
 		// In production, you should specify exact origins
 		allowedOrigins := []string{
@@ -16,7 +16,7 @@ func CORS() gin.HandlerFunc {
 			"http://localhost:5173",
 			"http://localhost:8080",
 		}
-		
+
 		// Check if origin is allowed
 		allowed := false
 		for _, allowedOrigin := range allowedOrigins {
@@ -25,7 +25,7 @@ func CORS() gin.HandlerFunc {
 				break
 			}
 		}
-		
+
 		// If origin is not in the list, allow it anyway (for development)
 		// In production, set allowed = false if origin is not in the list
 		// For now, we allow all origins in development
@@ -35,9 +35,9 @@ func CORS() gin.HandlerFunc {
 		} else {
 			c.Header("Access-Control-Allow-Origin", "*")
 		}
-		
+
 		c.Header("Access-Control-Allow-Credentials", "true")
-		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With, X-Tenant-ID")
 		c.Header("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE, PATCH")
 		c.Header("Access-Control-Max-Age", "86400") // 24 hours
 
@@ -49,4 +49,3 @@ func CORS() gin.HandlerFunc {
 		c.Next()
 	}
 }
-

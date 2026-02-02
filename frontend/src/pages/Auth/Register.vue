@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useRegister } from '@/composables/useAuth'
 import { useToast } from '@/composables/useToast'
+import { useTenantStore } from '@/stores/tenant'
 import PasswordStrength from '@/components/shared/PasswordStrength.vue'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
@@ -76,11 +77,21 @@ const handleSubmit = (e?: Event) => {
     return
   }
 
+  // Get tenant ID from store
+  const tenantStore = useTenantStore()
+  const tenantId = tenantStore.tenantId
+
+  if (!tenantId) {
+    toast.error('Unable to identify tenant. Please refresh the page.')
+    return
+  }
+
   register({
     name: trimmedName,
     lastname: trimmedLastname,
     email: trimmedEmail,
     password: password.value,
+    tenant_id: tenantId,
   })
 }
 </script>

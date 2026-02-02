@@ -9,6 +9,7 @@ import (
 	"werk-ticketing/internal/middleware"
 	"werk-ticketing/internal/tenant"
 	"werk-ticketing/internal/ticket"
+	"werk-ticketing/internal/upload"
 	"werk-ticketing/internal/user"
 )
 
@@ -63,38 +64,46 @@ func (r *Router) SetupRoutes() *gin.Engine {
 	// API versioning: /api/v1
 	apiV1 := router.Group("/api/v1")
 
-	// Apply tenant middleware to all API routes
-	// Tenant is identified from X-Tenant-ID header
-	apiV1.Use(middleware.WithTenant(r.tenantRepo, middleware.TenantFromHeader))
+	// Public routes (no tenant or auth required)
+	// These are accessible without any authentication or tenant context
+	r.setupAuthRoutes(apiV1)         // Login, register, forgot-password, etc.
+	r.setupPublicTenantRoutes(apiV1) // Tenant public info endpoint
 
-	// Setup route groups
-	r.setupAuthRoutes(apiV1)
-	r.setupTicketRoutes(apiV1)
-	r.setupTenantRoutes(apiV1)
-
-	// User endpoint (proxy to InvGate user API, requires auth)
-	userRoutes := apiV1.Group("/users")
-	userRoutes.Use(middleware.WithAuth(r.authService))
-	{
-		// GET /api/users/:id - Get InvGate user detail by ID
-		userRoutes.GET("/:id", r.ticketHandler.GetInvGateUser)
-		// PUT /api/users/profile - Update current user's profile
-		userRoutes.PUT("/profile", r.userHandler.UpdateProfile)
-	}
-
-	// Categories endpoint (public, no auth required for reference data)
+	// Public reference data endpoints (no auth, but may need tenant context in future)
 	apiV1.GET("/categories", r.ticketHandler.GetCategories)
-	// Ticket meta endpoint (public, no auth required for reference data)
 	apiV1.GET("/ticket-meta", r.ticketHandler.GetMeta)
-	// Statuses endpoint (public, no auth required for reference data)
 	apiV1.GET("/statuses", r.ticketHandler.GetStatuses)
-	// Articles endpoint (public, no auth required for reference data)
-	// Use higher rate limit for articles since landing page fetches multiple categories
+
+	// Articles endpoint (public, no auth required)
 	articleRoutes := apiV1.Group("/articles")
 	articleRoutes.Use(middleware.ArticleRateLimit())
 	{
 		articleRoutes.GET("", r.ticketHandler.GetArticlesByCategory)
 	}
+
+	// Protected routes (require tenant context and authentication)
+	// Apply tenant middleware to these routes
+	protectedRoutes := apiV1.Group("")
+	protectedRoutes.Use(middleware.WithTenant(r.tenantRepo, middleware.TenantFromHeader))
+	{
+		r.setupTicketRoutes(protectedRoutes)
+		r.setupAdminTenantRoutes(protectedRoutes) // Admin tenant CRUD routes
+
+		// User endpoint (proxy to InvGate user API, requires auth)
+		userRoutes := protectedRoutes.Group("/users")
+		userRoutes.Use(middleware.WithAuth(r.authService))
+		{
+			// GET /api/users/:id - Get InvGate user detail by ID
+			userRoutes.GET("/:id", r.ticketHandler.GetInvGateUser)
+			// PUT /api/users/profile - Update current user's profile
+			userRoutes.PUT("/profile", r.userHandler.UpdateProfile)
+		}
+	}
+
+	// Upload Endpoint (Protected)
+	protectedRoutes.POST("/upload", func(c *gin.Context) {
+		upload.NewHandler().UploadFile(c)
+	})
 
 	// Health check endpoint (no versioning, no tenant required)
 	router.GET("/health", func(c *gin.Context) {
@@ -103,6 +112,9 @@ func (r *Router) SetupRoutes() *gin.Engine {
 			"service": "werk-ticketing-backend",
 		})
 	})
+
+	// Serve uploaded files (Static)
+	router.Static("/uploads", "./uploads")
 
 	return router
 }

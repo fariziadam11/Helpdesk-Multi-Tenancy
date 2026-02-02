@@ -81,5 +81,6 @@ func (s *service) Login(ctx context.Context, tenantID string, req LoginRequest) 
 		Name:         existing.Name,
 		LastName:     existing.LastName,
 		Email:        existing.Email,
+		TenantID:     existing.TenantID,
 	}, nil
 }

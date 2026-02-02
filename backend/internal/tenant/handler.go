@@ -152,8 +152,8 @@ func (h *Handler) Update(c *gin.Context) {
 	if req.EmailSender != "" {
 		tenant.EmailSender = req.EmailSender
 	}
-	if req.LogoURL != "" {
-		tenant.LogoURL = req.LogoURL
+	if req.LogoURL != nil {
+		tenant.LogoURL = *req.LogoURL
 	}
 	if req.PrimaryColor != "" {
 		tenant.PrimaryColor = req.PrimaryColor

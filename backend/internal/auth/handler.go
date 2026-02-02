@@ -30,20 +30,26 @@ func getTenantID(c *gin.Context) (string, bool) {
 }
 
 // Register handles POST /auth/register
+// Register handles POST /auth/register
 func (h *Handler) Register(c *gin.Context) {
-	tenantID, ok := getTenantID(c)
-	if !ok {
-		response.ErrorWithCode(c, http.StatusBadRequest, errors.ErrCodeInvalidInput, "tenant not identified")
-		return
-	}
-
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.ErrorWithCode(c, http.StatusBadRequest, errors.ErrCodeInvalidInput, "invalid JSON body")
 		return
 	}
 
-	resp, err := h.service.Register(c.Request.Context(), tenantID, req)
+	// For registration, tenant ID must be provided in the body
+	if req.TenantID == "" {
+		// Try to get from context as fallback (though unlikely for public route)
+		if tid, ok := getTenantID(c); ok {
+			req.TenantID = tid
+		} else {
+			response.ErrorWithCode(c, http.StatusBadRequest, errors.ErrCodeInvalidInput, "tenant_id is required")
+			return
+		}
+	}
+
+	resp, err := h.service.Register(c.Request.Context(), req.TenantID, req)
 	if err != nil {
 		if appErr, ok := err.(*errors.AppError); ok {
 			response.AppError(c, appErr)
@@ -58,19 +64,15 @@ func (h *Handler) Register(c *gin.Context) {
 
 // Login handles POST /auth/login
 func (h *Handler) Login(c *gin.Context) {
-	tenantID, ok := getTenantID(c)
-	if !ok {
-		response.ErrorWithCode(c, http.StatusBadRequest, errors.ErrCodeInvalidInput, "tenant not identified")
-		return
-	}
-
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.ErrorWithCode(c, http.StatusBadRequest, errors.ErrCodeInvalidInput, "invalid JSON body")
 		return
 	}
 
-	resp, err := h.service.Login(c.Request.Context(), tenantID, req)
+	// Login without requiring tenant ID in request
+	// The service will find the user and return their tenant information
+	resp, err := h.service.Login(c.Request.Context(), "", req)
 	if err != nil {
 		if appErr, ok := err.(*errors.AppError); ok {
 			response.AppError(c, appErr)

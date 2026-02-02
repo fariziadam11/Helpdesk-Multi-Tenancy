@@ -54,18 +54,18 @@ type CreateTenantRequest struct {
 
 // UpdateTenantRequest is the DTO for updating a tenant
 type UpdateTenantRequest struct {
-	Name              string `json:"name,omitempty"`
-	InvGateCompanyID  *int   `json:"invgate_company_id,omitempty"`
-	InvGateGroupID    *int   `json:"invgate_group_id,omitempty"`
-	InvGateLocationID *int   `json:"invgate_location_id,omitempty"`
-	InvGateBaseURL    string `json:"invgate_base_url,omitempty"`
-	InvGateUsername   string `json:"invgate_username,omitempty"`
-	InvGatePassword   string `json:"invgate_password,omitempty"`
-	EmailDomain       string `json:"email_domain,omitempty"`
-	EmailSender       string `json:"email_sender,omitempty"`
-	LogoURL           string `json:"logo_url,omitempty"`
-	PrimaryColor      string `json:"primary_color,omitempty"`
-	IsActive          *bool  `json:"is_active,omitempty"`
+	Name              string  `json:"name,omitempty"`
+	InvGateCompanyID  *int    `json:"invgate_company_id,omitempty"`
+	InvGateGroupID    *int    `json:"invgate_group_id,omitempty"`
+	InvGateLocationID *int    `json:"invgate_location_id,omitempty"`
+	InvGateBaseURL    string  `json:"invgate_base_url,omitempty"`
+	InvGateUsername   string  `json:"invgate_username,omitempty"`
+	InvGatePassword   string  `json:"invgate_password,omitempty"`
+	EmailDomain       string  `json:"email_domain,omitempty"`
+	EmailSender       string  `json:"email_sender,omitempty"`
+	LogoURL           *string `json:"logo_url,omitempty"`
+	PrimaryColor      string  `json:"primary_color,omitempty"`
+	IsActive          *bool   `json:"is_active,omitempty"`
 }
 
 // TenantPublicInfo is the public-facing tenant info (for frontend branding)

@@ -86,7 +86,16 @@ func isDuplicateKeyError(err error) bool {
 
 func (r *gormRepository) GetByEmail(ctx context.Context, tenantID, email string) (*User, error) {
 	var u User
-	err := r.db.WithContext(ctx).Where("tenant_id = ? AND email = ?", tenantID, email).First(&u).Error
+
+	query := r.db.WithContext(ctx)
+
+	// If tenant ID is provided, filter by tenant
+	// If empty, allow cross-tenant login (user's tenant will be in their data)
+	if tenantID != "" {
+		query = query.Where("tenant_id = ?", tenantID)
+	}
+
+	err := query.Where("email = ?", email).First(&u).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil

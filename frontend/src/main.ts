@@ -9,9 +9,12 @@ import i18n from './i18n'
 // PrimeVue
 import PrimeVue from 'primevue/config'
 import Aura from '@primevue/themes/aura'
+import Tooltip from 'primevue/tooltip'
 import 'primeicons/primeicons.css'
 
 const app = createApp(App)
+
+app.directive('tooltip', Tooltip)
 
 // PrimeVue Configuration
 app.use(PrimeVue, {
