@@ -1,0 +1,977 @@
+{
+	"info": {
+		"_postman_id": "werk-ticketing-api",
+		"name": "Werk Ticketing API",
+		"description": "Dokumentasi lengkap untuk API backend Go yang digunakan untuk aplikasi ticketing system.\n\n**Rate Limiting:** 100 requests per menit (burst: 30)\n**Max Request Size:** 10 MB\n**Max Multipart Memory:** 32 MB\n\n**Token Details:**\n- Access Token Expiration: 15 menit\n- Refresh Token Expiration: 1 tahun",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "werk-ticketing"
+	},
+	"item": [
+		{
+			"name": "Health",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Check if the API server is running"
+					},
+					"response": []
+				}
+			],
+			"description": "Health check endpoint"
+		},
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.token) {",
+									"        pm.environment.set('access_token', jsonData.token);",
+									"    }",
+									"    if (jsonData.refresh_token) {",
+									"        pm.environment.set('refresh_token', jsonData.refresh_token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"John\",\n    \"lastname\": \"Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"password\": \"password123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Register a new user. User akan otomatis didaftarkan ke InvGate Armmada saat registrasi.\n\n**Validation Rules:**\n- name: Required, min 1 karakter, max 100 karakter\n- lastname: Required, min 1 karakter, max 100 karakter\n- email: Required, format email valid\n- password: Required, min 6 karakter"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.token) {",
+									"        pm.environment.set('access_token', jsonData.token);",
+									"    }",
+									"    if (jsonData.refresh_token) {",
+									"        pm.environment.set('refresh_token', jsonData.refresh_token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"john.doe@example.com\",\n    \"password\": \"password123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Authenticate user and get JWT tokens"
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.token) {",
+									"        pm.environment.set('access_token', jsonData.token);",
+									"    }",
+									"    if (jsonData.refresh_token) {",
+									"        pm.environment.set('refresh_token', jsonData.refresh_token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh_token\": \"{{refresh_token}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/refresh",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"refresh"
+							]
+						},
+						"description": "Get new access token using refresh token"
+					},
+					"response": []
+				},
+				{
+					"name": "Revoke Token",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/auth/revoke",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"revoke"
+							]
+						},
+						"description": "Revoke current access token. Token yang di-revoke akan ditambahkan ke blacklist dan tidak dapat digunakan lagi."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints untuk authentication dan token management"
+		},
+		{
+			"name": "Tickets",
+			"item": [
+				{
+					"name": "Create Ticket (JSON)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"source_id\": 1,\n    \"creator_id\": 100,\n    \"customer_id\": 100,\n    \"category_id\": 10,\n    \"type_id\": 20,\n    \"priority_id\": 30,\n    \"title\": \"Laptop bermasalah\",\n    \"description\": \"Keyboard tidak berfungsi\",\n    \"date_ocurred\": 1704067200\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/tickets",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tickets"
+							]
+						},
+						"description": "Create a new ticket in InvGate Armmada and save it to local database.\n\n**Required Fields:**\n- source_id (integer)\n- category_id (integer)\n- type_id (integer)\n- priority_id (integer)\n- title (string)\n- description (string)\n\n**Optional Fields:**\n- creator_id (integer) - Auto-populated from JWT token if not provided\n- customer_id (integer)\n- date_ocurred (integer, UNIX timestamp) - Cannot be in the future. Defaults to current time if not provided"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Ticket (Multipart with Attachment)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "source_id",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "category_id",
+									"value": "10",
+									"type": "text"
+								},
+								{
+									"key": "type_id",
+									"value": "20",
+									"type": "text"
+								},
+								{
+									"key": "priority_id",
+									"value": "30",
+									"type": "text"
+								},
+								{
+									"key": "title",
+									"value": "Laptop bermasalah",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Keyboard tidak berfungsi",
+									"type": "text"
+								},
+								{
+									"key": "date_ocurred",
+									"value": "1704067200",
+									"type": "text",
+									"description": "UNIX timestamp (optional)"
+								},
+								{
+									"key": "attachments",
+									"type": "file",
+									"src": [],
+									"description": "File attachments (can be multiple)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/tickets",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tickets"
+							]
+						},
+						"description": "Create ticket with file attachments using multipart/form-data"
+					},
+					"response": []
+				},
+				{
+					"name": "List Tickets",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/tickets?creator_id=&page=1&limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tickets"
+							],
+							"query": [
+								{
+									"key": "creator_id",
+									"value": "",
+									"description": "Filter by creator email (optional, defaults to JWT token email)",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (default: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Items per page (default: 10)"
+								}
+							]
+						},
+						"description": "Get paginated list of tickets. Jika creator_id tidak disediakan, akan otomatis menggunakan email dari JWT token."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Ticket Detail",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/tickets/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tickets",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "12345",
+									"description": "InvGate ticket ID"
+								}
+							]
+						},
+						"description": "Get detailed information about a specific ticket"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Ticket",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Updated title\",\n    \"description\": \"Updated description\",\n    \"category_id\": 11,\n    \"priority_id\": 31,\n    \"type_id\": 21\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/tickets/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tickets",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "12345",
+									"description": "InvGate ticket ID (must be numeric)"
+								}
+							]
+						},
+						"description": "Update an existing ticket. Semua field optional - hanya field yang dikirim yang akan di-update. date_ocurred tidak boleh di masa depan."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints untuk ticket management"
+		},
+		{
+			"name": "Comments",
+			"item": [
+				{
+					"name": "Get Ticket Comments",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/tickets/:id/comments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tickets",
+								":id",
+								"comments"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "12345",
+									"description": "InvGate ticket ID (must be numeric)"
+								}
+							]
+						},
+						"description": "Get all comments for a specific ticket"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Comment (JSON)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"request_id\": 12345,\n    \"author_id\": 100,\n    \"comment\": \"This is a comment\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/tickets/:id/comments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tickets",
+								":id",
+								"comments"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "12345",
+									"description": "InvGate ticket ID (auto-populated to request_id)"
+								}
+							]
+						},
+						"description": "Add a comment to a ticket. request_id auto-populated from path parameter, author_id auto-populated from JWT token if not provided."
+					},
+					"response": []
+				},
+				{
+					"name": "Add Comment (Multipart with Attachment)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "comment",
+									"value": "This is a comment with attachment",
+									"type": "text"
+								},
+								{
+									"key": "attachments",
+									"type": "file",
+									"src": [],
+									"description": "File attachments (can be multiple)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/tickets/:id/comments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tickets",
+								":id",
+								"comments"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "12345",
+									"description": "InvGate ticket ID"
+								}
+							]
+						},
+						"description": "Add comment with file attachments using multipart/form-data"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints untuk ticket comments"
+		},
+		{
+			"name": "Attachments",
+			"item": [
+				{
+					"name": "Download Attachment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/tickets/attachments/:attachment_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tickets",
+								"attachments",
+								":attachment_id"
+							],
+							"variable": [
+								{
+									"key": "attachment_id",
+									"value": "attachment_123",
+									"description": "Attachment ID from InvGate"
+								}
+							]
+						},
+						"description": "Download attachment file. Set Accept header to 'application/json' to get attachment info instead of file."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Attachment Info (JSON)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/tickets/attachments/:attachment_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tickets",
+								"attachments",
+								":attachment_id"
+							],
+							"variable": [
+								{
+									"key": "attachment_id",
+									"value": "attachment_123",
+									"description": "Attachment ID from InvGate"
+								}
+							]
+						},
+						"description": "Get attachment info as JSON instead of downloading file"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints untuk file attachments"
+		},
+		{
+			"name": "Solutions",
+			"item": [
+				{
+					"name": "Accept Solution",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"rating\": 5,\n    \"comment\": \"Problem solved, thank you!\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/tickets/:id/solution",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tickets",
+								":id",
+								"solution"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "12345",
+									"description": "InvGate ticket ID (must be numeric)"
+								}
+							]
+						},
+						"description": "Accept ticket solution with rating and comment.\n\n**Validation:**\n- Rating harus antara 1-5 (inclusive)\n- Comment wajib diisi jika rating < 4\n- Comment optional jika rating >= 4"
+					},
+					"response": []
+				},
+				{
+					"name": "Reject Solution",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"comment\": \"Solution doesn't work for me\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/tickets/:id/solution/reject",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tickets",
+								":id",
+								"solution",
+								"reject"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "12345",
+									"description": "InvGate ticket ID (must be numeric)"
+								}
+							]
+						},
+						"description": "Reject ticket solution with comment. Comment wajib diisi untuk memberikan alasan penolakan."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints untuk solution acceptance/rejection"
+		},
+		{
+			"name": "Reference Data",
+			"item": [
+				{
+					"name": "Get Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/categories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"categories"
+							]
+						},
+						"description": "Get list of ticket categories (public endpoint, no auth required)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Ticket Meta",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/ticket-meta",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ticket-meta"
+							]
+						},
+						"description": "Get ticket metadata including sources, types, priorities (public endpoint, no auth required)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Statuses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/statuses",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"statuses"
+							]
+						},
+						"description": "Get list of ticket statuses (public endpoint, no auth required)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Articles by Category",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/articles?category_id=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"articles"
+							],
+							"query": [
+								{
+									"key": "category_id",
+									"value": "10",
+									"description": "Category ID (required, must be numeric)"
+								}
+							]
+						},
+						"description": "Get articles filtered by category ID (public endpoint, no auth required)"
+					},
+					"response": []
+				}
+			],
+			"description": "Public reference data endpoints (no auth required)"
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Get User Detail",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "100",
+									"description": "InvGate User ID (must be numeric)"
+								}
+							]
+						},
+						"description": "Get InvGate user detail by ID"
+					},
+					"response": []
+				}
+			],
+			"description": "User management endpoints"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080/api/v1",
+			"type": "string"
+		}
+	]
+}
+

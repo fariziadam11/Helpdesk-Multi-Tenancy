@@ -1,0 +1,20 @@
+[Unit]
+Description=Werk Ticketing Backend Service
+After=network.target mysql.service
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/helpdeskgolang/backend
+ExecStart=/var/helpdeskgolang/backend/werk-ticketing-backend
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=werk-ticketing-backend
+
+# Environment
+Environment="GIN_MODE=release"
+
+[Install]
+WantedBy=multi-user.target
